@@ -1,7 +1,6 @@
 library(Rprebasso)
 
-setwd("C:/LocalData/hssairol/R/swedishData/PREBAS DATA SW/PREBAS DATA SW")
-load("output_sweden.rdata")
+load("rdata/output_sweden.rdata")
 
 
 countSoilC <- function(prebas_output, species) {
@@ -33,7 +32,7 @@ countSoilC <- function(prebas_output, species) {
     soilC_cwLit <- StStYasso(litter = cwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
                              Precip = Precip,litterSize = litterSizeDef[1,species[ij]],litType = 3,pYasso = pYAS)
     
-    soilC_lit[ij,,] <- data.table(cbind(soilC_nwLit, soilC_fwLit, soilC_cwLit))
+    soilC_lit[ij,,] <- cbind(soilC_nwLit, soilC_fwLit, soilC_cwLit)
   }
   return(soilC_lit)
 }

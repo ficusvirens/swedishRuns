@@ -1,5 +1,6 @@
 ###parameters old hc model
-speciesNam<- c("pine","spruce","decid")
+#speciesNam<- c("pine","spruce","decid")
+speciesNam<- c("pisy", "piab", "beal", "fasy", "pipi", "eugl", "rops")
 pHcM <- matrix(NA,6,7,dimnames = list(NULL,speciesNam))
 ###parameters Hcmodel pisy
 pHcM[,1] <- c(-1.67918379,	1.16550784,	-0.23744806, 
@@ -47,3 +48,4 @@ createInputsHc <- function(multiInitVar,layerX,spX){
   inputHc[,11] <- rowSums(multiInitVar[,5,],na.rm = T)
   return(inputHc)
 }
+
