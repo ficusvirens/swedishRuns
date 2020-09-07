@@ -17,49 +17,23 @@ harvLimGot <- initPrebasR2$nSites*harvestData[2,1]/harvestData[2,2]*1000*harvLvl
 harvLimNN <- initPrebasR3$nSites*harvestData[3,1]/harvestData[3,2]*1000*harvLvl
 harvLimSN <- initPrebasR4$nSites*harvestData[4,1]/harvestData[4,2]*1000*harvLvl
 
-
+# run the model
 output <- regionPrebas(initPrebas)
 output_svea <- regionPrebas(initPrebasR1, c(harvLimSvea, 0))
 output_got <- regionPrebas(initPrebasR2, c(harvLimGot, 0))
 output_nn <- regionPrebas(initPrebasR3, c(harvLimNN, 0))
 output_sn <- regionPrebas(initPrebasR4, c(harvLimSN, 0))
 
-save(output_svea, output_got, output_nn, output_sn, file="rdata/output_sweden.rdata")
+#save(output_svea, output_got, output_nn, output_sn, file="rdata/output_sweden.rdata")
+#load("rdata/output_sweden.rdata")
 
+# count the soil carbon in steady state
+species <- 1:3
 
-makePlots <- function(output,siteX=NULL){
-  nSites<-dim(output)[1]
-  nYears <- dim(output)[2]
-  dim.H<-cbind(c(1:nSites),nYears,11,rep(1,nSites),rep(1,nSites))
-  dim.D<-cbind(c(1:nSites),nYears,12,rep(1,nSites),rep(1,nSites))
-  dim.B<-cbind(c(1:nSites),nYears,13,rep(1,nSites),rep(1,nSites))
-  
-  if(all(is.na(siteX))){
-    H <- obs$H
-    D <- obs$D
-    BA <- obs$BA
-  }else{
-    H <- obs$H[siteX]
-    D <- obs$D[siteX]
-    BA <- obs$BA[siteX]
-  }
-  pH <- ggplot()+geom_point(aes(x=output[dim.H],y=H))+geom_abline(slope=1,intercept=0,color='red')+
-    xlab('Predicted stand Height(m)')+ylab('Oberserved stand Height')
-  # ggsave(filename = paste('stand H .png'),height=15,width = 15,units = 'cm')
-  
-  pD <- ggplot()+geom_point(aes(output[dim.D],D))+geom_abline(slope=1,intercept=0,color='red')+
-    xlab('Predicted stand DBH(cm)')+ylab('Oberserved stand DBH')
-  # ggsave(filename = paste('stand DBH .png'),height=15,width = 15,units = 'cm')
-  
-  pB <- ggplot()+geom_point(aes(output[dim.B],BA))+geom_abline(slope=1,intercept=0,color='red')+
-    xlab('Predicted stand basal area(m2/ha)')+ylab('Oberserved stand basal area')
-  # ggsave(filename = paste('stand B.png'),height=15,width = 15,units = 'cm')
-  # png("fit.png")
-  allPlot <- ggarrange(pH,pD,pB)
-  return(list(pH=pH,pD = pD,pB=pB,allPlot=allPlot))
-  
-}
-# dev.off()
+soilC_svea <- countSoilC(output_svea, species)
+soilC_got <- countSoilC(output_got, species)
+soilC_nn <- countSoilC(output_nn, species)
+soilC_sn <- countSoilC(output_sn, species)
 
 # allPlots
 #plots <- makePlots(output)

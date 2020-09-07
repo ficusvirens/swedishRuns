@@ -6,6 +6,8 @@ library(mapview)
 library(rgeos)
 multiLayer=TRUE
 
+source("functions.r")
+
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
 load('rdata/SWE.par.tair.vpd.precip.RData')
 
@@ -249,42 +251,6 @@ initPrebas <- InitMultiSite(nYearsMS = nYears,
                             # multiNthin = multiNthin
 )
 
-
-
-subSetInitPrebas <- function(siteX,defaultThin=0.,ClCut=0.){
-  PARx <- PAR[unique(siteInfo[siteX,2]),]
-  TAirx <- TAir[unique(siteInfo[siteX,2]),]
-  Precipx <- Precip[unique(siteInfo[siteX,2]),]
-  VPDx <- VPD[unique(siteInfo[siteX,2]),]
-  CO2x <- CO2[unique(siteInfo[siteX,2]),]
-  siteInfox <- siteInfo[siteX,]
-  siteInfox[,2] <- match(siteInfox[,2],unique(siteInfo[siteX,2]))
-
-  initPrebasX <- InitMultiSite(nYearsMS = nYears[siteX],
-                                siteInfo=siteInfox,
-                                # pCROBAS = pCrobas, #soil information haven't been considered
-                                # litterSize = litterSize,
-                                # pAWEN = parsAWEN,
-                                defaultThin=defaultThin,
-                                ClCut = ClCut,
-                                multiInitVar = multiInitVarX[siteX,,],
-                                # multiInitVar = multiInitVar2,
-                                PAR = PARx,
-                                TAir= TAirx,
-                                VPD= VPDx,
-                                Precip= Precipx,
-                                CO2= CO2x,
-                                yassoRun = 0.
-                                # lukeRuns = 0
-                                # initCLcutRatio = initCLcutRatio
-                                # multiThin = multiThin,
-                                # multiNthin = multiNthin
-  )
-  return(initPrebasX)
-}
-
-#set.seed(123)
-#regions  <- split(sample(1:nrow(siteInfo)),1:4)
 load("rdata/regions.rdata")
 sitesR1 <- regions[[1]]
 sitesR2 <- regions[[2]]
