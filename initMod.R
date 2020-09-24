@@ -11,12 +11,20 @@ source("functions.r")
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
 load('rdata/SWE.par.tair.vpd.precip.RData')
 
+vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
+devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+
+
 ####################climate##########################
 ####################start##########################
+# these are the meteo stations that are relevant to forests
 meteo.id<-sort(unique(cu$meteo.id))
 cu$Year<-as.numeric(substr(cu$id,1,4))
 # as.numeric(as.factor(sort(unique(cu$meteo.id))))
+# this is the number of the used meteo stations
 nclim<-length(meteo.id)
+
+# create matrices for weather data for 10 years
 PAR<-matrix(NA,nrow = nclim, ncol=3650)
 TAir<-matrix(NA,nrow = nclim,ncol=3650)
 Precip<-matrix(NA,nrow=nclim,ncol=3650)
@@ -32,9 +40,12 @@ summary(meteodata)
 meteodata$year<-as.numeric(substr(meteodata$date,1,4))
 
 for (i in 1:nclim) {
+  # select meteodata for meteo station i
   d1<-meteodata[which(meteodata$id==meteo.id[i]),]
   d1$year[which.min(abs(as.numeric(d1$year)-1993))]
+  # this picks meteo data for the year that's closest to year 1993
   d2<-d1[which(d1$year==d1$year[which.min(abs(as.numeric(d1$year)-1993))]),]
+  # and here we repeat the weather data for that year ten times for each variable
   PAR[i,]<-rep(d2$par_mjm2day[1:365],10)*1e6/2.35/1e5 
   ###'the energy content of solar radiation in the PAR waveband is 2.35 x 10^5 J/mol'
   TAir[i,]<-rep(d2$DTT.mean[1:365],10)
@@ -223,6 +234,7 @@ multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
 nYears<- rep(5,nrow(siteInfoX))
 library(Rprebasso)
 
+# replace NA values in weather data with mean values
 for (i in 1:3650) {
   PAR[which(is.na(PAR[,i])),i]<-  mean(PAR[which(!is.na(PAR[,i])),i])
   TAir[which(is.na(TAir[,i])),i]<-  mean(TAir[which(!is.na(TAir[,i])),i])
