@@ -6,137 +6,26 @@ library(mapview)
 library(rgeos)
 multiLayer=TRUE
 
+#load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
+#load('rdata/SWE.par.tair.vpd.precip.RData')
+
+#to remove Rprebasso:
+#remove.packages("Rprebasso")
+#detach("package:Rprebasso")
+vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
+devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
+
+#devtools::install_github("ForModLabUHel/Rprebasso", ref="v0.2x_gvW")
+
 source("functions.r")
 
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
 load('rdata/SWE.par.tair.vpd.precip.RData')
-
-vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
-devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
-
-
-####################climate##########################
-####################start##########################
-# these are the meteo stations that are relevant to forests
-meteo.id<-sort(unique(cu$meteo.id))
-cu$Year<-as.numeric(substr(cu$id,1,4))
-# as.numeric(as.factor(sort(unique(cu$meteo.id))))
-# this is the number of the used meteo stations
-nclim<-length(meteo.id)
-
-# create matrices for weather data for 10 years
-PAR<-matrix(NA,nrow = nclim, ncol=3650)
-TAir<-matrix(NA,nrow = nclim,ncol=3650)
-Precip<-matrix(NA,nrow=nclim,ncol=3650)
-VPD<-matrix(NA,nrow = nclim,ncol=3650)
-CO2<-matrix(380,nrow=nclim,ncol=3650)
-
-meteodata<-SWE.par.tair.vpd.precip[[1]]
-
-for (i in 2:151){
-  meteodata<-rbind(meteodata,SWE.par.tair.vpd.precip[[i]])
-}
-summary(meteodata)
-meteodata$year<-as.numeric(substr(meteodata$date,1,4))
-
-for (i in 1:nclim) {
-  # select meteodata for meteo station i
-  d1<-meteodata[which(meteodata$id==meteo.id[i]),]
-  d1$year[which.min(abs(as.numeric(d1$year)-1993))]
-  # this picks meteo data for the year that's closest to year 1993
-  d2<-d1[which(d1$year==d1$year[which.min(abs(as.numeric(d1$year)-1993))]),]
-  # and here we repeat the weather data for that year ten times for each variable
-  PAR[i,]<-rep(d2$par_mjm2day[1:365],10)*1e6/2.35/1e5 
-  ###'the energy content of solar radiation in the PAR waveband is 2.35 x 10^5 J/mol'
-  TAir[i,]<-rep(d2$DTT.mean[1:365],10)
-  Precip[i,]<-rep(d2$DRR.sum[1:365],10)
-  VPD[i,]<-rep(d2$vpd_kpa[1:365],10)
-}
-
-
-### find and fix the stations with annual precipitation of 300 or less ###
-
-# annual precipitations
-Precip_annual <- rowSums(Precip, na.rm=T)/10
-
-# in which stations the annual precipitation is under 300
-bad_stations <- which(Precip_annual < 300)
-
-good_stations <- which(Precip_annual >= 300)
-
-# to get the coordinates of the sites
-st_data <- meteodata[c("id", "lat", "long")]
-st_coord <- unique(st_data)
-
-# put the stations on map
-stations <- st_as_sf(st_coord, coords=c("long", "lat"))  %>%
-  st_set_crs(4326)
-
-# remove the stations that are not in meteo.id
-stations <- stations[stations$id %in% meteo.id,]
-stations <- arrange(stations, by=id)
-# check the stations out
-mapview(stations)
-
-bst <- stations[bad_stations,]
-gst <- stations[good_stations,] 
-
-# setup for distance calculation
-utmStr <- "+proj=utm +zone=%d +datum=NAD83 +units=m +no_defs +ellps=GRS80"
-crs <- CRS(sprintf(utmStr, 32))
-gstUTM <- st_transform(gst, crs)
-bstUTM <- st_transform(bst, crs)
-
-## Set up containers for results
-n <- nrow(bstUTM)
-nearestGST <- numeric(n)
-distToNearestGST <- numeric(n)
-
-## For each point, find name of nearest station
-for (i in seq_along(nearestGST)) {
-  gDists <- st_distance(bstUTM[i,], gstUTM, byid=TRUE)
-  nearestGST[i] <- gstUTM$id[which.min(gDists)]
-  distToNearestGST[i] <- min(gDists)
-}
-
-bst$replacing_station <- nearestGST
-
-# meteo.id.2 is a vector where the stations with unrealistic precipitation
-# data are replaced with the nearest neighbor
-meteo.id.2 <- meteo.id
-
-for (i in 1:nclim) {
-  j <- which(bst$id==meteo.id[i]) 
-  if (length(j)!=0) meteo.id.2[i] <- bst$replacing_station[j]  
-}
-
-# and now we get the precipitation data again with the new stations
-for (i in 1:nclim) {
-  # select meteodata for meteo station i
-  d1<-meteodata[which(meteodata$id==meteo.id.2[i]),]
-  # ????
-  d1$year[which.min(abs(as.numeric(d1$year)-1993))]
-  # this picks meteo data for the year that's closest to year 1993
-  d2<-d1[which(d1$year==d1$year[which.min(abs(as.numeric(d1$year)-1993))]),]
-  # and here we repeat the weather data for year 1989 ten times for each variable
-  PAR[i,]<-rep(d2$par_mjm2day[1:365],10)*1e6/2.35/1e5 
-  ###'the energy content of solar radiation in the PAR waveband is 2.35 x 10^5 J/mol'
-  TAir[i,]<-rep(d2$DTT.mean[1:365],10)
-  Precip[i,]<-rep(d2$DRR.sum[1:365],10)
-  VPD[i,]<-rep(d2$vpd_kpa[1:365],10)
-}
-
-
-# save(PAR,file = 'PAR.rdata')
-# save(TAir,file = 'TAir.rdata')
-# save(VPD,file = 'VPD.rdata')
-# save(Precip,file = 'Precip.rdata')
-# save(CO2,file = 'CO2.rdata')
-
-# plot(PAR[1,1:365])
-#################### Climate end##########################
+# this loads the weather inputs 
+load("rdata/weather.rdata")
 
 ####################SiteInfo start##########################
+cu$Year<-as.numeric(substr(cu$id,1,4))
 FI<-read.csv('input/up1380xredigerad.csv')
 FI$ID<-as.numeric(paste(FI$taxar,FI$traktnr,FI$palslagnr,FI$delytanr,sep = ''))
 Initial<-cu
@@ -162,10 +51,16 @@ siteInfo<- data.frame(siteID=c(1:nrow(cu)),
                                FC=rep(0.450,nSites),
                                WP=rep(0.118,nSites)
                                     )
-siteInfo$siteType[which(cu$SIpine>=26)]<-1
-siteInfo$siteType[which(cu$SIpine<26&cu$SIpine>=20)]<-2
-siteInfo$siteType[which(cu$SIpine<20&cu$SIpine>=14)]<-3
-siteInfo$siteType[which(cu$SIpine<14&cu$SIpine>=8)]<-4
+siteInfo$siteType[which(cu$SIpine>=26)]<-2
+siteInfo$siteType[which(cu$SIpine<26&cu$SIpine>=20)]<-3
+siteInfo$siteType[which(cu$SIpine<20&cu$SIpine>=14)]<-4
+siteInfo$siteType[which(cu$SIpine<14&cu$SIpine>=8)]<-5
+
+# test?
+Initial$siteType[which(cu$SIpine<20&cu$SIpine>=14)]<-4
+Initial$siteType[which(cu$SIpine<14&cu$SIpine>=8)]<-5
+Initial$siteType[which(cu$SIpine>=26)]<-2
+Initial$siteType[which(cu$SIpine<26&cu$SIpine>=20)]<-3
 
 summary(siteInfo)
 if(multiLayer){
@@ -234,29 +129,21 @@ multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
 nYears<- rep(5,nrow(siteInfoX))
 library(Rprebasso)
 
-# replace NA values in weather data with mean values
-for (i in 1:3650) {
-  PAR[which(is.na(PAR[,i])),i]<-  mean(PAR[which(!is.na(PAR[,i])),i])
-  TAir[which(is.na(TAir[,i])),i]<-  mean(TAir[which(!is.na(TAir[,i])),i])
-  Precip[which(is.na(Precip[,i])),i]<-  mean(Precip[which(!is.na(Precip[,i])),i])
-  VPD[which(is.na(VPD[,i])),i]<-  mean(VPD[which(!is.na(VPD[,i])),i])
-}
-
 initPrebas <- InitMultiSite(nYearsMS = nYears,
                             siteInfo=siteInfoX,
                             # pCROBAS = pCrobas, #soil information haven't been considered
                             # litterSize = litterSize,
                             # pAWEN = parsAWEN,
-                            defaultThin=0.,
-                            ClCut = 0.,
+                            #defaultThin=0.,
+                            #ClCut = 0.,
                             multiInitVar = multiInitVarX,
                             # multiInitVar = multiInitVar2,
                             PAR = PAR,
                             TAir= TAir,
                             VPD= VPD,
                             Precip= Precip,
-                            CO2= CO2,
-                            yassoRun = 0.
+                            CO2= CO2
+                            #yassoRun = 0.
                             # lukeRuns = 0
                             # initCLcutRatio = initCLcutRatio
                             # multiThin = multiThin,
@@ -273,6 +160,27 @@ initPrebasR2 <- subSetInitPrebas(sitesR2,defaultThin = 1,ClCut = 1)
 initPrebasR3 <- subSetInitPrebas(sitesR3,defaultThin = 1,ClCut = 1)
 initPrebasR4 <- subSetInitPrebas(sitesR4,defaultThin = 1,ClCut = 1)
 
+source("countSites.r")
+initPrebas_svea <- list()
+for(i in 1:3) {
+  initPrebas_svea[[i]] <- subSetInitPrebas(svea[[i]],defaultThin = 1,ClCut = 1)
+}
+
+initPrebas_got <- list()
+for(i in 1:3) {
+  initPrebas_got[[i]] <- subSetInitPrebas(got[[i]],defaultThin = 1,ClCut = 1)
+}
+
+initPrebas_sn <- list()
+for(i in 1:3) {
+  initPrebas_sn[[i]] <- subSetInitPrebas(sn[[i]],defaultThin = 1,ClCut = 1)
+}
+
+initPrebas_nn <- list()
+for(i in 1:3) {
+  initPrebas_nn[[i]] <- subSetInitPrebas(nn[[i]],defaultThin = 1,ClCut = 1)
+}
+
 
 H<-   Initial$h_mbaw[which(multiInitVar[,2,1]>0&multiInitVar[,3,1]>0&multiInitVar[,4,1]>0&multiInitVar[,5,1]>0)]
 D<-   Initial$d_cm_baw[which(multiInitVar[,2,1]>0&multiInitVar[,3,1]>0&multiInitVar[,4,1]>0&multiInitVar[,5,1]>0)]
@@ -285,5 +193,7 @@ save(obs,initPrebas,
      initPrebasR2,sitesR2,
      initPrebasR3,sitesR3,
      initPrebasR4,sitesR4,
+     initPrebas_svea, initPrebas_got, initPrebas_nn, initPrebas_sn,
+     
      file="rdata/initPrebas.rdata")
 

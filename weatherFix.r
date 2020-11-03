@@ -225,3 +225,23 @@ for (i in 1:nrow(stUTM)) {
   }
 }
 
+save(TAir, Precip, PAR, VPD, CO2, file="rdata/weather.rdata")
+
+# move the weather data from the first year to the end
+for(i in 1:nclim) {
+  temp <- TAir[i, 1:365]
+  temp2 <- TAir[i, 366:3650]
+  TAir[i,] <- c(temp2, temp)
+  
+  temp <- Precip[i, 1:365]
+  temp2 <- Precip[i, 366:3650]
+  Precip[i,] <- c(temp2, temp)
+  
+  temp <- PAR[i, 1:365]
+  temp2 <- PAR[i, 366:3650]
+  PAR[i,] <- c(temp2, temp)
+  
+  temp <- VPD[i, 1:365]
+  temp2 <- VPD[i, 366:3650]
+  VPD[i,] <- c(temp2, temp)
+}
