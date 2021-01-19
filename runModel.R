@@ -18,12 +18,21 @@ harvLimGot <- initPrebasR2$nSites*harvestData[2,1]/harvestData[2,2]*1000*harvLvl
 harvLimNN <- initPrebasR3$nSites*harvestData[3,1]/harvestData[3,2]*1000*harvLvl
 harvLimSN <- initPrebasR4$nSites*harvestData[4,1]/harvestData[4,2]*1000*harvLvl
 
+harvLimMin <- initPrebas_mineral$nSites*harvestData[5,1]/harvestData[5,2]*1000*harvLvl
+harvLimPeat <- initPrebas_peat$nSites*harvestData[5,1]/harvestData[5,2]*1000*harvLvl
+
+
 # run the model
-output <- regionPrebas(initPrebas, c(harvLimAll, 0))
+output <- regionPrebas(initPrebas, c(harvLimAll,0))
 output_svea <- regionPrebas(initPrebasR1, c(harvLimSvea, 0))
 output_got <- regionPrebas(initPrebasR2, c(harvLimGot, 0))
 output_nn <- regionPrebas(initPrebasR3, c(harvLimNN, 0))
 output_sn <- regionPrebas(initPrebasR4, c(harvLimSN, 0))
+
+output_m <- regionPrebas(initPrebas_mineral, c(harvLimMin,0))
+output_p <- regionPrebas(initPrebas_peat, c(harvLimPeat,0))
+
+ll <- regionPrebas(initPrebas, c(harvLimAll,0))
 
 #save(output_svea1, output_svea2, output_svea3, output_svea4, output_svea5, output_svea6, output_svea7, output_svea8, output_svea9, output_svea10, file="rdata/sveaOutput.rdata")
 #save(output_svea, output_got, output_nn, output_sn, file="rdata/output_sweden.rdata")
@@ -32,6 +41,7 @@ output_sn <- regionPrebas(initPrebasR4, c(harvLimSN, 0))
 # count the soil carbon in steady state
 species <- 1:3
 
+#test <- countSoilC(output, species)
 soilC_svea <- countSoilC(output_svea, species)
 soilC_got <- countSoilC(output_got, species)
 soilC_nn <- countSoilC(output_nn, species)
@@ -112,123 +122,102 @@ makePlots(output_svea, sitesR1)
 
 # COUNT SOIL C MEANS WITH AND WITHOUT GROUND VEGETATION
 
-# SVEALAND
-# switch on ground vegetation
-initPrebasR1$GVrun <- 1
+# all mineral
+species <- 1:3
+initPrebas <- initPrebas_mineral
+initPrebas$GVrun <- 1
 
-output_svea_gv <- list()
-soilC_svea_gv <- list()
-Csum_svea_gv <- list()
-
-for(i in 1:10) {
-  output_svea_gv[[i]] <- regionPrebas(initPrebasR1, c(harvLimSvea, 0))
-  soilC_svea_gv[[i]] <- countSoilC(output_svea_gv[[i]], species)
-  Csum_svea_gv[[i]] <- sum(soilC_svea_gv[[i]])
-}
-mean_soilC_svea_gv <- mean(unlist(Csum_svea_gv))
-
-# switch off ground vegetation
-initPrebasR1$GVrun <- 0
-
-output_svea_gv0 <- list()
-soilC_svea_gv0 <- list()
-Csum_svea_gv0 <- list()
+output_gv <- list()
+soilC_gv <- list()
+Csum_tree <- list()
+Csum_gv <- list()
 
 for(i in 1:10) {
-  output_svea_gv0[[i]] <- regionPrebas(initPrebasR1, c(harvLimSvea, 0))
-  soilC_svea_gv0[[i]] <- countSoilC(output_svea_gv0[[i]], species)
-  Csum_svea_gv0[[i]] <- sum(soilC_svea_gv0[[i]])
+  output_gv[[i]] <- regionPrebas(initPrebas, c(harvLimMin, 0))
+  soilC_gv[[i]] <- countSoilC(output_gv[[i]], species)
+  Csum_tree[[i]] <- sum(soilC_gv[[i]]$treeLitter)
+  Csum_gv[[i]] <- sum(soilC_gv[[i]]$gvLitter)
 }
-mean_soilC_svea_gv0 <- mean(unlist(Csum_svea_gv0))
+mean_soilC_tree <- mean(unlist(Csum_tree))
 
-# GÖTALAND
-# switch on ground vegetation
-initPrebasR2$GVrun <- 1
+mean_soilC_gv <- mean(unlist(Csum_gv))
 
-output_got_gv <- list()
-soilC_got_gv <- list()
-Csum_got_gv <- list()
+# svea
+initPrebas <- initPrebasR1
+initPrebas$GVrun <- 1
+
+output_gv <- list()
+soilC_gv <- list()
+Csum_tree <- list()
+Csum_gv <- list()
 
 for(i in 1:10) {
-  output_got_gv[[i]] <- regionPrebas(initPrebasR2, c(harvLimGot, 0))
-  soilC_got_gv[[i]] <- countSoilC(output_got_gv[[i]], species)
-  Csum_got_gv[[i]] <- sum(soilC_got_gv[[i]])
+  output_gv[[i]] <- regionPrebas(initPrebas, c(harvLimSvea, 0))
+  soilC_gv[[i]] <- countSoilC(output_gv[[i]], species)
+  Csum_tree[[i]] <- sum(soilC_gv[[i]]$treeLitter)
+  Csum_gv[[i]] <- sum(soilC_gv[[i]]$gvLitter)
 }
-mean_soilC_got_gv <- mean(unlist(Csum_got_gv))
+mean_soilC_tree_svea <- mean(unlist(Csum_tree))
 
-# switch off ground vegetation
-initPrebasR2$GVrun <- 0
+mean_soilC_gv_svea <- mean(unlist(Csum_gv))
 
-output_got_gv0 <- list()
-soilC_got_gv0 <- list()
-Csum_got_gv0 <- list()
+# got
+initPrebas <- initPrebasR2
+initPrebas$GVrun <- 1
+
+output_gv <- list()
+soilC_gv <- list()
+Csum_tree <- list()
+Csum_gv <- list()
 
 for(i in 1:10) {
-  output_got_gv0[[i]] <- regionPrebas(initPrebasR2, c(harvLimGot, 0))
-  soilC_got_gv0[[i]] <- countSoilC(output_got_gv0[[i]], species)
-  Csum_got_gv0[[i]] <- sum(soilC_got_gv0[[i]])
+  output_gv[[i]] <- regionPrebas(initPrebas, c(harvLimGot, 0))
+  soilC_gv[[i]] <- countSoilC(output_gv[[i]], species)
+  Csum_tree[[i]] <- sum(soilC_gv[[i]]$treeLitter)
+  Csum_gv[[i]] <- sum(soilC_gv[[i]]$gvLitter)
 }
-mean_soilC_got_gv0 <- mean(unlist(Csum_got_gv0))
+mean_soilC_tree_got <- mean(unlist(Csum_tree))
 
-# NORRA NORRLAND
-# switch on ground vegetation
-initPrebasR3$GVrun <- 1
+mean_soilC_gv_got <- mean(unlist(Csum_gv))
 
-output_nn_gv <- list()
-soilC_nn_gv <- list()
-Csum_nn_gv <- list()
+# nn
+initPrebas <- initPrebasR3
+initPrebas$GVrun <- 1
+
+output_gv <- list()
+soilC_gv <- list()
+Csum_tree <- list()
+Csum_gv <- list()
 
 for(i in 1:10) {
-  output_nn_gv[[i]] <- regionPrebas(initPrebasR3, c(harvLimNN, 0))
-  soilC_nn_gv[[i]] <- countSoilC(output_nn_gv[[i]], species)
-  Csum_nn_gv[[i]] <- sum(soilC_nn_gv[[i]])
+  output_gv[[i]] <- regionPrebas(initPrebas, c(harvLimNN, 0))
+  soilC_gv[[i]] <- countSoilC(output_gv[[i]], species)
+  Csum_tree[[i]] <- sum(soilC_gv[[i]]$treeLitter)
+  Csum_gv[[i]] <- sum(soilC_gv[[i]]$gvLitter)
 }
-mean_soilC_nn_gv <- mean(unlist(Csum_nn_gv))
+mean_soilC_tree_nn <- mean(unlist(Csum_tree))
 
-# switch off ground vegetation
-initPrebasR3$GVrun <- 0
+mean_soilC_gv_nn <- mean(unlist(Csum_gv))
 
-output_nn_gv0 <- list()
-soilC_nn_gv0 <- list()
-Csum_nn_gv0 <- list()
+# sn
+initPrebas <- initPrebasR4
+initPrebas$GVrun <- 1
+
+output_gv <- list()
+soilC_gv <- list()
+Csum_tree <- list()
+Csum_gv <- list()
 
 for(i in 1:10) {
-  output_nn_gv0[[i]] <- regionPrebas(initPrebasR3, c(harvLimNN, 0))
-  soilC_nn_gv0[[i]] <- countSoilC(output_nn_gv0[[i]], species)
-  Csum_nn_gv0[[i]] <- sum(soilC_nn_gv0[[i]])
+  output_gv[[i]] <- regionPrebas(initPrebas, c(harvLimSN, 0))
+  soilC_gv[[i]] <- countSoilC(output_gv[[i]], species)
+  Csum_tree[[i]] <- sum(soilC_gv[[i]]$treeLitter)
+  Csum_gv[[i]] <- sum(soilC_gv[[i]]$gvLitter)
 }
-mean_soilC_nn_gv0 <- mean(unlist(Csum_nn_gv0))
+mean_soilC_tree_sn <- mean(unlist(Csum_tree))
 
-# SÖDRA NORRLAND
-# switch on ground vegetation
-initPrebasR4$GVrun <- 1
+mean_soilC_gv_sn <- mean(unlist(Csum_gv))
 
-output_sn_gv <- list()
-soilC_sn_gv <- list()
-Csum_sn_gv <- list()
-
-for(i in 1:10) {
-  output_sn_gv[[i]] <- regionPrebas(initPrebasR4, c(harvLimSN, 0))
-  soilC_sn_gv[[i]] <- countSoilC(output_sn_gv[[i]], species)
-  Csum_sn_gv[[i]] <- sum(soilC_sn_gv[[i]])
-}
-mean_soilC_sn_gv <- mean(unlist(Csum_sn_gv))
-
-# switch off ground vegetation
-initPrebasR4$GVrun <- 0
-
-output_sn_gv0 <- list()
-soilC_sn_gv0 <- list()
-Csum_sn_gv0 <- list()
-
-for(i in 1:10) {
-  output_sn_gv0[[i]] <- regionPrebas(initPrebasR4, c(harvLimSN, 0))
-  soilC_sn_gv0[[i]] <- countSoilC(output_sn_gv0[[i]], species)
-  Csum_sn_gv0[[i]] <- sum(soilC_sn_gv0[[i]])
-}
-mean_soilC_sn_gv0 <- mean(unlist(Csum_sn_gv0))
-
-C_gv <- c(mean_soilC_got_gv, mean_soilC_svea_gv, mean_soilC_sn_gv, mean_soilC_nn_gv)
 
 
 # regionwise divided into different site types

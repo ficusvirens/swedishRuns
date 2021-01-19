@@ -22,23 +22,26 @@ source("functions.r")
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
 load('rdata/SWE.par.tair.vpd.precip.RData')
 # this loads the weather inputs 
-load("rdata/weather.rdata")
+load("rdata/weather100.rdata")
 
 ####################SiteInfo start##########################
 cu$Year<-as.numeric(substr(cu$id,1,4))
 FI<-read.csv('input/up1380xredigerad.csv')
 FI$ID<-as.numeric(paste(FI$taxar,FI$traktnr,FI$palslagnr,FI$delytanr,sep = ''))
+
+
 Initial<-cu
-nSites<-nrow(Initial)
-cu$SIpine<-NA
+nSites<-nrow(cu)
+
+Initial$SIpine<-NA
 for (i in 1:nSites ) {
-  cu$SIpine[i]<-FI$SiPine[which(FI$ID==cu$id[i])[1]]
+  Initial$SIpine[i]<-FI$SiPine[which(FI$ID==Initial$id[i])[1]]
 }
 
-summary(cu$SIpine)
+summary(Initial$SIpine)
 
 
-siteInfo<- data.frame(siteID=c(1:nrow(cu)),
+siteInfo<- data.frame(siteID=c(1:nrow(Initial)),
                               climID=as.numeric(as.factor(Initial$meteo.id)),
                               siteType=rep(NA,nSites),
                               SWinit=rep(200,nSites),
@@ -51,16 +54,16 @@ siteInfo<- data.frame(siteID=c(1:nrow(cu)),
                                FC=rep(0.450,nSites),
                                WP=rep(0.118,nSites)
                                     )
-siteInfo$siteType[which(cu$SIpine>=26)]<-2
-siteInfo$siteType[which(cu$SIpine<26&cu$SIpine>=20)]<-3
-siteInfo$siteType[which(cu$SIpine<20&cu$SIpine>=14)]<-4
-siteInfo$siteType[which(cu$SIpine<14&cu$SIpine>=8)]<-5
+siteInfo$siteType[which(Initial$SIpine>=26)]<-2
+siteInfo$siteType[which(Initial$SIpine<26&Initial$SIpine>=20)]<-3
+siteInfo$siteType[which(Initial$SIpine<20&Initial$SIpine>=14)]<-4
+siteInfo$siteType[which(Initial$SIpine<14&Initial$SIpine>=8)]<-5
 
 # test?
-Initial$siteType[which(cu$SIpine<20&cu$SIpine>=14)]<-4
-Initial$siteType[which(cu$SIpine<14&cu$SIpine>=8)]<-5
-Initial$siteType[which(cu$SIpine>=26)]<-2
-Initial$siteType[which(cu$SIpine<26&cu$SIpine>=20)]<-3
+Initial$siteType[which(Initial$SIpine<20&Initial$SIpine>=14)]<-4
+Initial$siteType[which(Initial$SIpine<14&Initial$SIpine>=8)]<-5
+Initial$siteType[which(Initial$SIpine>=26)]<-2
+Initial$siteType[which(Initial$SIpine<26&Initial$SIpine>=20)]<-3
 
 summary(siteInfo)
 if(multiLayer){
@@ -110,7 +113,19 @@ siteX <- which(apply(multiInitVar[,2,],1,sum,na.rm=T)>0 &
                  apply(multiInitVar[,3,],1,sum,na.rm=T)>0 & 
                  apply(multiInitVar[,4,],1,sum,na.rm=T) > 0 &
                  apply(multiInitVar[,5,],1,sum,na.rm=T)>0)
+
+# to take peatlands out
+#carina <- read.csv("input/skdata_carina.csv")
+#carina$id <- paste(carina$AR, carina$TRAKT, carina$PALSLAG ,sep="")
+#myvars <- c("id", "hist")
+#hist <- carina[myvars]
+#cu <- merge(cu, hist)
+#mineral <- which(cu$hist==0)
+#siteX <- intersect(siteX, mineral)
+
 InitialX <- Initial[siteX,]
+
+nSites <- nrow(InitialX)
 siteInfoX<-siteInfo[siteX,]
 multiInitVarX<-multiInitVar[siteX,,]
 
@@ -126,7 +141,12 @@ multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
 
 # multiInitVar2 <- array(0,dim=c(nrow(siteInfo),7,maxNlayers))
 # multiInitVar2[,,1]<-multiInitVar0
-nYears<- rep(5,nrow(siteInfoX))
+# run for 100 years
+nYears<- rep(100,nrow(siteInfoX))
+
+#nYears<- rep(5, tail(siteX, n=1))
+
+
 library(Rprebasso)
 
 initPrebas <- InitMultiSite(nYearsMS = nYears,
@@ -155,10 +175,34 @@ sitesR1 <- regions[[1]]
 sitesR2 <- regions[[2]]
 sitesR3 <- regions[[3]]
 sitesR4 <- regions[[4]]
+
+load("rdata/peatlands.rdata")
+# without peatlands
+sitesR1 <- intersect(mineral, regions$svea)
+sitesR2 <- intersect(mineral, regions$got)
+sitesR3 <- intersect(mineral, regions$nn)
+sitesR4 <- intersect(mineral, regions$sn)
+
+# just peatlands
+#sitesR1 <- intersect(peat, regions$svea)
+#sitesR2 <- intersect(peat, regions$got)
+#sitesR3 <- intersect(peat, regions$nn)
+#sitesR4 <- intersect(peat, regions$sn)
+
+
+
 initPrebasR1 <- subSetInitPrebas(sitesR1,defaultThin = 1,ClCut = 1)
 initPrebasR2 <- subSetInitPrebas(sitesR2,defaultThin = 1,ClCut = 1)
 initPrebasR3 <- subSetInitPrebas(sitesR3,defaultThin = 1,ClCut = 1)
 initPrebasR4 <- subSetInitPrebas(sitesR4,defaultThin = 1,ClCut = 1)
+
+
+initPrebas_mineral <- subSetInitPrebas(mineral, defaultThin = 1, ClCut = 1)
+
+
+initPrebas_peat <- subSetInitPrebas(peat, defaultThin = 1, ClCut = 1)
+
+
 
 source("countSites.r")
 initPrebas_svea <- list()
@@ -197,3 +241,47 @@ save(obs,initPrebas,
      
      file="rdata/initPrebas.rdata")
 
+
+### site by site calculations 
+
+#colnames(multiInitVarX[,,1]) <- c("speciesID", "age", "H", "D", "BA", "Hc", "Ac")
+
+multiInitVarY <- initPrebas$multiInitVar
+
+# age = 1
+multiInitVarY[,2,] <- 1
+# H = 1.5
+multiInitVarY[,3,] <- 1.5
+# D = 0.5
+multiInitVarY[,4,] <- 0.5
+# Hc = 0.
+multiInitVarY[,6,] <- 0.
+# BA = 0.0431969 * BAsp/BAtot
+multiInitVarY[,5,1] <- 0.0431969*multiInitVarX[,5,1]/(multiInitVarX[,5,1]+multiInitVarX[,5,2]+multiInitVarX[,5,3])
+multiInitVarY[,5,2] <- 0.0431969*multiInitVarX[,5,2]/(multiInitVarX[,5,1]+multiInitVarX[,5,2]+multiInitVarX[,5,3])
+multiInitVarY[,5,3] <- 0.0431969*multiInitVarX[,5,3]/(multiInitVarX[,5,1]+multiInitVarX[,5,2]+multiInitVarX[,5,3])
+
+
+initPrebas <- InitMultiSite(nYearsMS = nYears,
+                            siteInfo=siteInfoX,
+                            # pCROBAS = pCrobas, #soil information haven't been considered
+                            # litterSize = litterSize,
+                            # pAWEN = parsAWEN,
+                            #defaultThin=0.,
+                            #ClCut = 0.,
+                            multiInitVar = multiInitVarY,
+                            # multiInitVar = multiInitVar2,
+                            PAR = PAR,
+                            TAir= TAir,
+                            VPD= VPD,
+                            Precip= Precip,
+                            CO2= CO2
+                            #yassoRun = 0.
+                            # lukeRuns = 0
+                            # initCLcutRatio = initCLcutRatio
+                            # multiThin = multiThin,
+                            # multiNthin = multiNthin
+)
+
+
+save(multiInitVarY, siteInfoX, nYears, harvLimAll, file="multiInitVar.rdata")
