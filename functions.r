@@ -109,21 +109,29 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
 
 
 # counts the soil carbon in steady state site spesific
-countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA) {
+countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLength=NA) {
   ### prebas_output = output object of PREBAS simulations
   ### species = vector of species, use same IDs of pCROBAS and yasso
   ### gvrun = 1 (default) to run the ground vegetation calculations
-  ### rotLength = vector of the length of the number of sites indicating the number
+  ### simLength = vector of the length of the number of sites indicating the number
   #####of years to consider in the calculations. default is NA means that all years
   #####of the simulations are considered
+  #### rotLength = vector of the site specific rotation length calculated by rotationLength function
   nSites <- prebas_output$nSites
+  if(all(is.na(rotLength)) | all(is.na(simLength))) {
+    rotFactor = rep(1, nSites)
+  }
+  else {
+    rotFactor <- simLength/rotLength
+  }
+  
   nSp <- length(species)
-  if(all(is.na(rotLength))){
+  if(all(is.na(simLength))){
     meansLit <- apply(prebas_output$multiOut[,,26:29,,1], c(1,3,4), mean) ###Calculate the mean for the first year
   }else{
     meansLit <- array(NA,dim=c(nSites,4,nSp))
     for(i in 1:nSites){
-      meansLit[i,,] <- apply(prebas_output$multiOut[i,1:rotLength[i],26:29,,1], c(2,3), mean) ###Calculate the mean for the first year
+      meansLit[i,,] <- apply(prebas_output$multiOut[i,1:simLength[i],26:29,,1], c(2,3), mean)*rotFactor[i] ###Calculate the mean for the first year
     }
   }
   ###GV calculations inititialization
@@ -141,7 +149,7 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA) {
                                                                    ets[i,ij],siteType[ij],
                                                                    0,0,p0[ij,1],rep(0,4))[[7]]))
     }
-    AWENgv2 <- apply(AWENgv,c(1,3),mean,na.rm=T)
+    AWENgv2 <- apply(AWENgv,c(1,3),mean,na.rm=T)*rotFactor
     AWENgv2[which(is.na(AWENgv2),arr.ind = T)] <- 0.
   }
   soilC_lit <- array(NA,dim=c(prebas_output$nSites,nSp,5,3),dimnames = list(site=NULL,
@@ -181,16 +189,25 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA) {
 }
 
 
-# find out the length of rotation period
-rotationLength <- function(output) {
+# find out the length of simulation period
+simulationLength <- function(output) {
   sumBA <- apply(output$multiOut[,,13,,1], 1:2, sum)
   
-  rotlength <- vector()
+  simlength <- vector()
   
   for(i in 1:nrow(sumBA)) {
-    rotlength[i] <- match(0, sumBA[i,])
+    simlength[i] <- match(0, sumBA[i,])
   }
-  return(rotlength) 
+
+  return(simlength) 
+}
+
+
+# rotation length
+rotationLength <- function(output, simLength) {
+  # length = year of clearcut + age when the simulation starts
+  rotlength <- simLength+output$multiInitVar[,2,1]
+  return(rotlength)
 }
 
 

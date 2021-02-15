@@ -119,7 +119,7 @@ c_melt_all$value <- c_melt_all$value/10
 
 
 boxplot(value~variable+region, data=c_melt_all,  
-        xlab="region", ylab="soil C (kg/m2)", main="Soil C in Sweden", names = c("Götaland", "Norra Norrland", "Södra Norrland", "Svealand"))
+        xlab="region", ylab="soil C (kg/m2)", main="Soil C in Sweden", names = c("G?taland", "Norra Norrland", "S?dra Norrland", "Svealand"))
 
 
 svea_c_r <- (mean_soilC_tree_svea+mean_soilC_gv_svea)/10000
@@ -1276,16 +1276,17 @@ write.table(data, file="harvestOutput.txt", col.names = T, quote=F, sep=",")
 
 
 #################
+output <- output_noharv
 
-plot(output$multiOut[1,,7,1,1])
-plot(output$multiOut[1,,11,2,1])
+plot(output$multiOut[1,,13,2,1], type="l")
+plot(output$multiOut[1,,13,2,1], type="l")
 
 # plot the basal area of the first site
-plot(output$multiOut[1,,13,2,1], type = "l", main ="BA", xlab="year", ylab="m2/ha", ylim=c(0,40))
+plot(output$multiOut[1,,13,3,1], type = "l", main ="BA", xlab="year", ylab="m2/ha", ylim=c(0,40))
 lines(output$multiOut[3,,13,2,1], col="red")
 
 for(i in 2:100) {
-  lines(output$multiOut[i,,13,2,1])
+  lines(output_svea$multiOut[i,,13,2,1])
 }
 
 for(i in 101:200) {
@@ -1305,7 +1306,11 @@ hist(rowMeans(sumBA2), add=T, col = "red")
 
 suspicious_sites <- which(rowMeans(sumBA)<1)
 
-# HUOM! Tarkista ovatko epäilyttävät koealat soita!
+# HUOM! Tarkista ovatko ep?ilytt?v?t koealat soita!
+
+ageX <- as.vector(output$multiOut[,,7,1,1])
+basalX <- as.vector(apply(output$multiOut[,,13,,1],1:2,sum,na.rm=T))
+plot(ageX, basalX, pch=".")
 
 plot(output$multiOut[suspicious_sites[1],,13,3,1], type="l", ylim=c(0, 4))
 
@@ -1321,16 +1326,12 @@ hist(sumBA3)
 # BA site means
 plot(colMeans(output$multiOut[,,13,2,1]), type="l")
 
+# soil carbon in steady state mineral soils
 
-rotlength <- rotationLength(output)
-
-test <- countSoilCstsp(output, species, gvrun = 1,rotLength = rotlength)
-
-hist(rowSums(test$treeLitter))
-hist(rowSums(test$gvLitter))
-
-test2 <- rowSums(test$treeLitter)+rowSums(test$gvLitter)
-hist(test2, main = "treeLitter + gvLitter")
+svea_m <- intersect(regions$svea, mineral)
+got_m <- intersect(regions$got, mineral)
+sn_m <- intersect(regions$sn, mineral)
+nn_m <- intersect(regions$nn, mineral)
 
 
 
@@ -1341,37 +1342,174 @@ c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
 
 
-prebas_gv0 <- rowSums(test$treeLitter)/10000
-prebas_gv <- (rowSums(test$treeLitter)+rowSums(test$gvLitter))/10000
-
 
 # SWEDEN
-hist(InitialX$c.tot.tha/10, breaks = seq(0,80, by=2), main="Soil carbon in Sweden", xlab="kg/m2", xlim=c(0,26), ylim=c(0,2200))
-hist(prebas_gv0, add=T, breaks = seq(0,6, by=2), border="blue", col=c1)
-hist(prebas_gv, add=T, breaks = seq(0,6, by=2), border="red", col=c2)
+
+# rotation length for each site
+simLength <- simulationLength(output)
+rotLength <- rotationLength(output, simLength)
+species <- 1:3
+
+rotLength[rotLength>100] <- 100
+
+# soil C in steady state for each site
+soilC_sites2 <- countSoilCstsp(output, species, gvrun = 1,rotLength = rotLength, simLength = simLength)
+
+soilC_sites3 <- countSoilCstsp(output, species, gvrun = 1,rotLength = simLength, simLength = simLength)
+
+#hist(rowSums(soilC_sites$treeLitter))
+#hist(rowSums(soilC_sites$gvLitter))
+
+#test2 <- rowSums(soilC_sites$treeLitter)+rowSums(soilC_sites$gvLitter)
+#hist(test2, main = "treeLitter + gvLitter")
+prebas_gv02 <- rowSums(soilC_sites$treeLitter)/10000
+prebas_gv2 <- (rowSums(soilC_sites$treeLitter)+rowSums(soilC_sites$gvLitter))/10000
+
+prebas_gv02 <- rowSums(soilC_sites2$treeLitter)/10000
+prebas_gv2 <- (rowSums(soilC_sites2$treeLitter)+rowSums(soilC_sites2$gvLitter))/10000
+
+
+gbr <- c("grey", "blue", "red")
+
+hist(InitialX[mineral]$c.tot.tha/10, breaks = seq(0,50, by=1), main="Soil carbon in Sweden", xlab="kg/m2", xlim=c(0,40),ylim=c(0,800))
+hist(prebas_gv0[mineral], add=T, breaks = seq(0,12, by=1), col="yellow")
+hist(prebas_gv[mineral], add=T, breaks = seq(0,14, by=1), col="green")
+
+
+hist(prebas_gv02[mineral], add=T, breaks = seq(0,12, by=1), border="blue", col=c1)
+hist(prebas_gv2[mineral], add=T, breaks = seq(0,14, by=1), border="red", col=c2)
+
+
+legend("topright", fill = gbr, legend = c("Measurements","Prebas without gv", "Prebas with gv"), horiz = F)
 
 
 # SVEA
-hist(InitialX[regions$svea]$c.tot.tha/10, breaks = seq(0,80, by=2), main="Soil carbon in Svealand", xlab="kg/m2", xlim=c(0,20), ylim=c(0,700))
-hist(prebas_gv0[regions$svea], add=T, breaks = seq(0,6, by=2), border="blue", col=c1)
-hist(prebas_gv[regions$svea], add=T, breaks = seq(0,6, by=2), border="red", col=c2)
+
+hist(InitialX[svea_m]$c.tot.tha/10, breaks=seq(0,36,by=1), main="Soil carbon in Svealand", xlab="kg/m2", xlim=c(0,30),ylim=c(0,250))
+hist(prebas_gv0[svea_m], breaks=seq(0,14,by=1), add=T, border="blue", col=c1)
+hist(prebas_gv[svea_m], breaks=seq(0,14,by=1), add=T, border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Measurements","Prebas without gv", "Prebas with gv"), horiz = F)
+
 
 # GOT
-hist(InitialX[regions$got]$c.tot.tha/10, breaks = seq(0,80, by=2), main="Soil carbon in Götaland", xlab="kg/m2", xlim=c(0,20), ylim=c(0,1200))
-hist(prebas_gv0[regions$got], add=T, breaks = seq(0,6, by=2), border="blue", col=c1)
-hist(prebas_gv[regions$got], add=T, breaks = seq(0,6, by=2), border="red", col=c2)
+hist(InitialX[got_m]$c.tot.tha/10, breaks=seq(0,42,by=1), main="Soil carbon in G?taland", xlab="kg/m2", xlim=c(0,30), ylim=c(0,400))
+hist(prebas_gv0[got_m], add=T, breaks = seq(0,12, by=1), border="blue", col=c1)
+hist(prebas_gv[got_m], add=T, breaks = seq(0,14, by=1), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Measurements","Prebas without gv", "Prebas with gv"), horiz = F)
 
 # SN
-hist(InitialX[regions$sn]$c.tot.tha/10, breaks = seq(0,80, by=2), main="Soil carbon in Södra Norrland", xlab="kg/m2", xlim=c(0,20), ylim=c(0,500))
-hist(prebas_gv0[regions$sn], add=T, breaks = seq(0,6, by=2), border="blue", col=c1)
-hist(prebas_gv[regions$sn], add=T, breaks = seq(0,6, by=2), border="red", col=c2)
+hist(InitialX[sn_m]$c.tot.tha/10, breaks = seq(0,80, by=1), main="Soil carbon in S?dra Norrland", xlab="kg/m2", xlim=c(0,30), ylim=c(0,170))
+hist(prebas_gv0[sn_m], add=T, breaks = seq(0,12, by=1), border="blue", col=c1)
+hist(prebas_gv[sn_m], add=T, breaks = seq(0,12, by=1), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Measurements","Prebas without gv", "Prebas with gv"), horiz = F)
+
 
 # NN
-hist(InitialX[regions$nn]$c.tot.tha/10, breaks = seq(0,80, by=2), main="Soil carbon in Norra Norrland", xlab="kg/m2", xlim=c(0,20), ylim=c(0,500))
-hist(prebas_gv0[regions$nn], add=T, breaks = seq(0,6, by=2), border="blue", col=c1)
-hist(prebas_gv[regions$nn], add=T, breaks = seq(0,6, by=2), border="red", col=c2)
+hist(InitialX[nn_m]$c.tot.tha/10, breaks = seq(0,34, by=1), main="Soil carbon in Norra Norrland", xlab="kg/m2", xlim=c(0,30),ylim=c(0,160))
+hist(prebas_gv0[nn_m], add=T, breaks = seq(0,12, by=1), border="blue", col=c1)
+hist(prebas_gv[nn_m], add=T, breaks = seq(0,14, by=1), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Measurements","Prebas without gv", "Prebas with gv"), horiz = F)
+
+###---------- sensitivity analysis: increased rotation length 1.2 x
+
+load("rdata/sensana.rdata")
+
+gbr <- c("grey", "blue", "red")
+
+hist(InitialX[mineral]$c.tot.tha/10, breaks = seq(0,60, by=2), main="Soil carbon in Sweden", xlab="kg/m2", xlim=c(0,30), ylim=c(0,1800))
+hist(normal_rotLength, add=T, breaks = seq(0,14, by=2), border="blue", col=c1)
+hist(inc_rotLength, add=T, breaks = seq(0,14, by=2), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Tupek","Normal rotation length", "Increased rotation length"), horiz = F)
+
+hist(InitialX[svea_m]$c.tot.tha/10, breaks = seq(0,60, by=2), main="Soil carbon in Svealand", xlab="kg/m2", xlim=c(0,35), ylim=c(0,400))
+hist(normal_rotLength[svea_m], add=T, breaks = seq(0,12, by=2), border="blue", col=c1)
+hist(inc_rotLength[svea_m], add=T, breaks = seq(0,12, by=2), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Tupek","Normal rotation length", "Increased rotation length"), horiz = F)
+
+hist(InitialX[got_m]$c.tot.tha/10, breaks = seq(0,60, by=2), main="Soil carbon in GÃ¶taland", xlab="kg/m2", xlim=c(0,40), ylim=c(0,500))
+hist(normal_rotLength[got_m], add=T, breaks = seq(0,14, by=2), border="blue", col=c1)
+hist(inc_rotLength[got_m], add=T, breaks = seq(0,14, by=2), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Tupek","Normal rotation length", "Increased rotation length"), horiz = F)
+
+hist(InitialX[sn_m]$c.tot.tha/10, breaks = seq(0,60, by=2), main="Soil carbon in SÃ¶dra Norrland", xlab="kg/m2", xlim=c(0,25), ylim=c(0,300))
+hist(normal_rotLength[sn_m], add=T, breaks = seq(0,14, by=2), border="blue", col=c1)
+hist(inc_rotLength[sn_m], add=T, breaks = seq(0,12, by=2), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Tupek","Normal rotation length", "Increased rotation length"), horiz = F)
+
+hist(InitialX[nn_m]$c.tot.tha/10, breaks = seq(0,60, by=2), main="Soil carbon in Norra Norrland", xlab="kg/m2", xlim=c(0,30), ylim=c(0,300))
+hist(normal_rotLength[nn_m], add=T, breaks = seq(0,12, by=2), border="blue", col=c1)
+hist(inc_rotLength[nn_m], add=T, breaks = seq(0,14, by=2), border="red", col=c2)
+legend("topright", fill = gbr, legend = c("Tupek","Normal rotation length", "Increased rotation length"), horiz = F)
 
 
+
+# boxplot of soil C in steady state 
+# all regions, method 2
+myvars <- "c.tot.tha"
+
+c_all <- data.frame(InitialX[mineral])[myvars]
+
+c_svea <- data.frame(InitialX[svea_m])[myvars]
+c_got <- data.frame(InitialX[got_m])[myvars]
+c_sn <- data.frame(InitialX[sn_m])[myvars]
+c_nn <- data.frame(InitialX[nn_m])[myvars]
+
+c_all_melt <- melt(c_all)
+c_all_melt$region <- "all"
+c_svea_melt <- melt(c_svea)
+c_svea_melt$region <- "svea"
+c_got_melt <- melt(c_got)
+c_got_melt$region <- "got"
+c_sn_melt <- melt(c_sn)
+c_sn_melt$region <- "sn"
+c_nn_melt <- melt(c_nn)
+c_nn_melt$region <- "nn"
+
+c_melt_all_tupek <- rbind(c_all_melt, c_svea_melt, c_got_melt, c_sn_melt, c_nn_melt)
+# to kg/m2
+c_melt_all_tupek$value <- c_melt_all_tupek$value/10
+
+
+colnames(c_melt_all_tupek) <- c("variable", "tupek", "region")
+c_melt_all_tupek <- c_melt_all_tupek[,2:3]
+
+c_all <- prebas_gv[mineral]
+c_svea <- prebas_gv[svea_m]
+c_got <- prebas_gv[got_m]
+c_sn <- prebas_gv[sn_m]
+c_nn <- prebas_gv[nn_m]
+
+c_all_melt <- melt(c_all)
+c_all_melt$region <- "all"
+c_svea_melt <- melt(c_svea)
+c_svea_melt$region <- "svea"
+c_got_melt <- melt(c_got)
+c_got_melt$region <- "got"
+c_sn_melt <- melt(c_sn)
+c_sn_melt$region <- "sn"
+c_nn_melt <- melt(c_nn)
+c_nn_melt$region <- "nn"
+
+c_melt_all_prebas <- rbind(c_all_melt,c_svea_melt, c_got_melt, c_sn_melt, c_nn_melt)
+#c_melt_all_prebas$variable <- "soilC"
+
+colnames(c_melt_all_prebas) <- c("prebas", "region")
+c_melt_all <- merge(c_melt_all_tupek, c_melt_all_prebas)
+
+c_all <- melt(c_melt_all)
+
+myColors <- c(rgb(0.1,0.1,0.7,0.5), "grey90" )
+boxplot(value~variable+region, data=c_all,  
+        xlab="region", ylab="soil C (kg/m2)", main="Soil C in Sweden", names = c("All Sweden", "", "G?taland", "", "Norra Norrland", "", "S?dra Norrland", "", "Svealand", ""), col=myColors)
+legend("topright", fill = myColors, legend = c("Measurements","Prebas"), horiz = F)
+
+
+
+# testing stuff for 100 years run--------------
+rotlength <- rotationLength(output)
+rotlength <- rotLength
+
+# average harvest volume per year per site
 hVsite <- vector()
 for(i in 1:nSites){
   hVsite[i] <- sum(output$multiOut[i,1:rotlength[i],37,,1])/rotlength[i]
@@ -1379,33 +1517,85 @@ for(i in 1:nSites){
 
 sum(hVsite)
 
+# total harvest per year in all sweden
+nSites <- length(mineral)
 hVyear <- vector()
 for(i in 1:100){
   hVyear[i] <- sum(output$multiOut[1:nSites,i,37,,1])
 }
 plot(hVyear, type="l", xlab="year", ylab="total harvest")
 
+# total volume of the sites per year
 hVV <- vector()
 for(i in 1:100){
   hVV[i] <- sum(output$multiOut[1:nSites,i,30,,1])
 }
 plot(hVV, type="l", xlab="year", ylab="total volume")
 
+# volume of the sites one year before clearcut
 Vsite <- vector()
 for(i in 1:nSites){
-  Vsite[i] <- sum(output$multiOut[i,rotlength[i-1],30,,1])
+  Vsite[i] <- sum(output$multiOut[i,rotlength[i]-1,30,,1])
 }
 
-hist(Vsite, main ="V", xlab="")
+hist(Vsite, main ="Volume", xlab="")
 
+# harvested volume at clearcut
 hVsite2 <- vector()
 for(i in 1:nSites){
   hVsite2[i] <- sum(output$multiOut[i,rotlength[i],37,,1])
 }
 hist(hVsite2, main = "Vharvested", xlab="")
 
+# BA one year before clearcut
 BAsite <- vector()
 for(i in 1:nSites){
-  BAsite[i] <- sum(output$multiOut[i,rotlength[i-1],13,,1])
+  BAsite[i] <- sum(output$multiOut[i,rotlength[i]-1,13,,1])
 }
 hist(BAsite)
+
+# mean BA 
+BAsiteMean <- vector()
+for(i in 1:nSites){
+  BAsiteMean[i] <- sum(output$multiOut[i,1:rotlength[i],13,,1])/rotlength[i]
+}
+hist(BAsiteMean)
+
+# mean H
+HsiteMean <- vector()
+for(i in 1:nSites){
+  HsiteMean[i] <- sum(output$multiOut[i,1:rotlength[i],11,,1])/rotlength[i]
+}
+hist(HsiteMean)
+
+# max H at one year before clearcut
+Hsite <- vector()
+for(i in 1:nSites){
+  Hsite[i] <- max(output$multiOut[i,rotlength[i]-1,11,,1], na.rm=T)
+}
+hist(Hsite, main="Max height", xlab="")
+
+# max tree height
+max(output$multiOut[,,11,,1])
+
+
+BAsiteMean <- vector()
+for(i in 1:nSites){
+  BAsiteMean[i] <- sum(output$multiOut[i,,13,,1])/100
+}
+hist(BAsiteMean)
+
+Hsite <- vector()
+for(i in 1:nSites){
+  Hsite[i] <- mean(output$multiOut[i,100,11,,1])
+}
+hist(Hsite)
+
+BAsite <- vector()
+for(i in 1:nSites){
+  BAsite[i] <- sum(output$multiOut[i,100,13,,1])
+}
+hist(BAsite)
+
+
+###########---------------
