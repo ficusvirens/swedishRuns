@@ -4,6 +4,12 @@ library(sf)
 library(tidyverse)
 library(mapview)
 library(rgeos)
+
+# run these before installing Rprebasso!
+library(abind)
+library(plyr)
+
+
 multiLayer=TRUE
 
 #load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
@@ -12,7 +18,8 @@ multiLayer=TRUE
 #to remove Rprebasso:
 #remove.packages("Rprebasso")
 #detach("package:Rprebasso")
-vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
+vPREBAS <- "master"   #### choose PREBAS verson to run the model  "master" or "v0.2.x"
+#vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
 devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
 
 #devtools::install_github("ForModLabUHel/Rprebasso", ref="v0.2x_gvW")
@@ -141,8 +148,8 @@ multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
 
 # multiInitVar2 <- array(0,dim=c(nrow(siteInfo),7,maxNlayers))
 # multiInitVar2[,,1]<-multiInitVar0
-# run for 100 years
-nYears<- rep(100,nrow(siteInfoX))
+# run for 100 years, DO NOT CHANGE
+nYears<- rep(5,nrow(siteInfoX))
 
 #nYears<- rep(5, tail(siteX, n=1))
 
@@ -248,8 +255,14 @@ save(obs,initPrebas,
 
 multiInitVarY <- initPrebas$multiInitVar
 
-# age = 1
-multiInitVarY[,2,] <- 1
+# counting age
+avETS <- rowSums(initPrebas$ETSy[siteInfoX[,2],])/100
+siteType <- siteInfoX$siteType
+Ainits = round(6 + 2* siteType - 0.005*avETS + 2.25)
+
+# age 
+multiInitVarY[,2,] <- Ainits
+
 # H = 1.5
 multiInitVarY[,3,] <- 1.5
 # D = 0.5
@@ -261,7 +274,7 @@ multiInitVarY[,5,1] <- 0.0431969*multiInitVarX[,5,1]/(multiInitVarX[,5,1]+multiI
 multiInitVarY[,5,2] <- 0.0431969*multiInitVarX[,5,2]/(multiInitVarX[,5,1]+multiInitVarX[,5,2]+multiInitVarX[,5,3])
 multiInitVarY[,5,3] <- 0.0431969*multiInitVarX[,5,3]/(multiInitVarX[,5,1]+multiInitVarX[,5,2]+multiInitVarX[,5,3])
 
-
+#multiInitVarX <- multiInitVarY
 initPrebas <- InitMultiSite(nYearsMS = nYears,
                             siteInfo=siteInfoX,
                             # pCROBAS = pCrobas, #soil information haven't been considered
@@ -284,4 +297,26 @@ initPrebas <- InitMultiSite(nYearsMS = nYears,
 )
 
 
-save(multiInitVarY, siteInfoX, nYears, harvLimAll, file="multiInitVar.rdata")
+#save(multiInitVarY, siteInfoX, nYears, harvLimAll, file="multiInitVar.rdata")
+
+#initPrebas_noharv <- InitMultiSite(nYearsMS = nYears,
+#                            siteInfo=siteInfoX,
+                            # pCROBAS = pCrobas, #soil information haven't been considered
+                            # litterSize = litterSize,
+                            # pAWEN = parsAWEN,
+#                            defaultThin=0.,
+#                            ClCut = 0.,
+#                            multiInitVar = multiInitVarY,
+                            # multiInitVar = multiInitVar2,
+#                            PAR = PAR,
+#                            TAir= TAir,
+#                            VPD= VPD,
+#                            Precip= Precip,
+#                            CO2= CO2
+                            #yassoRun = 0.
+                            # lukeRuns = 0
+                            # initCLcutRatio = initCLcutRatio
+                            # multiThin = multiThin,
+                            # multiNthin = multiNthin
+#)
+

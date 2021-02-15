@@ -32,7 +32,22 @@ output_sn <- regionPrebas(initPrebasR4, c(harvLimSN, 0))
 output_m <- regionPrebas(initPrebas_mineral, c(harvLimMin,0))
 output_p <- regionPrebas(initPrebas_peat, c(harvLimPeat,0))
 
-ll <- regionPrebas(initPrebas, c(harvLimAll,0))
+output_noharv <- regionPrebas(initPrebas_noharv, c(harvLimAll,0))
+
+output <- multiPrebas(initPrebas)
+output_1.5 <- multiPrebas(initPrebas1.5)
+output_max <- multiPrebas(initPrebasMax)
+
+output_svea <- multiPrebas(initPrebasR1)
+output_got <- multiPrebas(initPrebasR2)
+output_nn <- multiPrebas(initPrebasR3)
+output_sn <- multiPrebas(initPrebasR4)
+
+output <- multiPrebas(initPrebas_mineral)
+
+species=1:3
+rotLength <- rotationLength(output)
+test <- countSoilCstsp(output, species, rotLength)
 
 #save(output_svea1, output_svea2, output_svea3, output_svea4, output_svea5, output_svea6, output_svea7, output_svea8, output_svea9, output_svea10, file="rdata/sveaOutput.rdata")
 #save(output_svea, output_got, output_nn, output_sn, file="rdata/output_sweden.rdata")
