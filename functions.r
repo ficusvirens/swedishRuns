@@ -244,4 +244,14 @@ makePlots <- function(output,siteX=NULL){
   return(list(pH=pH,pD = pD,pB=pB,allPlot=allPlot))
   
 }
+
+
+regionName <- function(region) {
+  if(identical(region, mineral)) return("Sweden")
+  else if(identical(region, got_m)) return("Götaland")
+  else if(identical(region, svea_m)) return("Svealand")
+  else if(identical(region, sn_m)) return("Södra Norrland")
+  else if(identical(region, nn_m)) return("Norra Norrland")
+}
+
 # dev.off()
