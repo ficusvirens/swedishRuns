@@ -54,8 +54,9 @@ plots_sf <- st_as_sf(coordPlots, coords=c("long", "lat")) %>%
 
 plots_sf$number <- c(1:nrow(plots_sf))
 
-save(sweden_landsdel, plots_sf, file="rdata/sweden_landsdel.rdata")
+#save(sweden_landsdel, plots_sf, file="rdata/sweden_landsdel.rdata")
 
+load("rdata/sweden_landsdel.rdata")
 mapview(sweden_landsdel) + mapview(plots_sf)
 
 plots_ld <- st_intersection(plots_sf, sweden_landsdel)

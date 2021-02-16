@@ -17,12 +17,12 @@ cu$Year<-as.numeric(substr(cu$id,1,4))
 # this is the number of the used meteo stations
 nclim<-length(meteo.id)
 
-# create matrices for weather data for 10 years
-PAR<-matrix(NA,nrow = nclim, ncol=3650)
-TAir<-matrix(NA,nrow = nclim,ncol=3650)
-Precip<-matrix(NA,nrow=nclim,ncol=3650)
-VPD<-matrix(NA,nrow = nclim,ncol=3650)
-CO2<-matrix(380,nrow=nclim,ncol=3650)
+# create matrices for weather data for 30 years
+PAR<-matrix(NA,nrow = nclim, ncol=10950)
+TAir<-matrix(NA,nrow = nclim,ncol=10950)
+Precip<-matrix(NA,nrow=nclim,ncol=10950)
+VPD<-matrix(NA,nrow = nclim,ncol=10950)
+CO2<-matrix(380,nrow=nclim,ncol=10950)
 
 meteodata<-SWE.par.tair.vpd.precip[[1]]
 
@@ -77,7 +77,7 @@ seq_lengths <- function(pos) {
   colnames(seqs) <- c("index", "length")
   seqs2 <- data.frame(seqs)
   seqs2 <- seqs2[order(-seqs2$length),]
-
+  
   return(seqs2)
 }
 
@@ -85,22 +85,22 @@ seq_lengths <- function(pos) {
 
 # datetable is a data.frame with dates from start_date to end_date 
 dates <- vector()
-start_date <- strptime("1993-01-01", "%Y-%m-%d")
-end_date <- strptime("2002-12-31", "%Y-%m-%d")
+start_date <- strptime("1981-01-01", "%Y-%m-%d")
+end_date <- strptime("2010-12-31", "%Y-%m-%d")
 dates <- seq.POSIXt(as.POSIXct(start_date), as.POSIXct(end_date), by = 86400) #86400 sec is a day
 year <- as.numeric(format(dates, "%Y"))
 date <- format(dates, "%Y-%m-%d")
 datetable <- data.frame(date, year)
- 
+
 myvars <- c("DTT.mean", "DRR.sum", "par_mjm2day", "vpd_kpa", "id", "year", "date", "lat", "long")
 m.data <- meteodata[myvars]
-m.data <- m.data[which(m.data$year>1992 & m.data$year<2003),]
+m.data <- m.data[which(m.data$year>1980 & m.data$year<2011),]
 m.data$date <- as.character(m.data$date)
 
 
 d2 <- vector()
 for (i in 1:nclim) {
-  for (j in 1993:2002) {
+  for (j in 1981:2011) {
     d1 <- m.data[which(m.data$year==j & m.data$id==meteo.id[i]),]
     # if the whole year is missing, then leave it be
     # if the year contains 365 days, then leave it be
@@ -114,7 +114,7 @@ for (i in 1:nclim) {
 
 # check NA's, replace with mean values
 for (i in 1:nclim) {
-  for (j in 1993:2002) {
+  for (j in 1981:2011) {
     for (k in 1:4) {
       d1 <- d2[which(d2$year==j & d2$id==meteo.id[i]),]
       
@@ -146,7 +146,7 @@ for (i in 1:nclim) {
             d1[na_pos[n],k] <- mean(d1[formean,k], na.rm = T)
           }
         }
-      d2[which(d2$year==j & d2$id==meteo.id[i]),] <- d1  
+        d2[which(d2$year==j & d2$id==meteo.id[i]),] <- d1  
       }
     }
   }
@@ -158,16 +158,16 @@ for (i in 1:nclim) {
 
 w_varnam <- c("TAir", "Precip", "PAR", "VPD")
 w_data <- list()
-  
+
 for(k in 1:4) {
   wdata <- meteo.id
   containsData = 0
-
-  for(j in 1993:2002) {
+  
+  for(j in 1981:2011) {
     dataVector <- vector()
     for(i in 1:nclim) {
       d1 <- d2[which(d2$year==j & d2$id==meteo.id[i]),]
-
+      
       # if data contains any NA or there is no data, containsData = 0
       if(anyNA(d1[,k]) | nrow(d1)<365) {
         containsData = 0
@@ -177,7 +177,7 @@ for(k in 1:4) {
     }
     wdata <- cbind(wdata, dataVector)
   }
-  colnames(wdata) <- c("id", 1993:2002)
+  colnames(wdata) <- c("id", 1981:2011)
   w_data[[k]] <- wdata
 }
 
@@ -207,43 +207,26 @@ for (i in 1:nrow(stUTM)) {
     wd_temp <- vector()
     t3 <- cbind(t2, w_data[[k]])
     t4 <- t3[order(t1),]
-
+    
     # this is for the years
     for(j in 1:10) {
       # take the closest station with data - may be the original
       id.to.use = t4[match(1, t4[,(j+3)]),3]
       a1 <- d2[which(d2$id==id.to.use),]
-      a2 <- a1[which(a1$year==(1992+j)),]
+      a2 <- a1[which(a1$year==(1980+j)),]
       a3 <- a2[,k]
       wd_temp <- c(wd_temp, a3[1:365])
     }
-  # store the weather data to the right variable
-  if(k==1) TAir[i,] <- wd_temp
-  if(k==2) Precip[i,] <- wd_temp
-  if(k==3) PAR[i,] <- wd_temp
-  if(k==4) VPD[i,] <- wd_temp
+    # store the weather data to the right variable
+    if(k==1) TAir[i,] <- wd_temp
+    if(k==2) Precip[i,] <- wd_temp
+    if(k==3) PAR[i,] <- wd_temp
+    if(k==4) VPD[i,] <- wd_temp
   }
 }
 
 # convert PAR MJ/(m2*d) -> mmol/(m2*d)
 PAR <- PAR*4.968
-save(TAir, Precip, PAR, VPD, CO2, file="rdata/weather.rdata")
 
-# move the weather data from the first year to the end
-for(i in 1:nclim) {
-  temp <- TAir[i, 1:365]
-  temp2 <- TAir[i, 366:3650]
-  TAir[i,] <- c(temp2, temp)
-  
-  temp <- Precip[i, 1:365]
-  temp2 <- Precip[i, 366:3650]
-  Precip[i,] <- c(temp2, temp)
-  
-  temp <- PAR[i, 1:365]
-  temp2 <- PAR[i, 366:3650]
-  PAR[i,] <- c(temp2, temp)
-  
-  temp <- VPD[i, 1:365]
-  temp2 <- VPD[i, 366:3650]
-  VPD[i,] <- c(temp2, temp)
-}
+save(TAir, Precip, PAR, VPD, CO2, file="rdata/weather30.rdata")
+
