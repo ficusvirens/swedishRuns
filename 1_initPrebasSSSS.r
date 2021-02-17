@@ -114,7 +114,9 @@ siteX <- which(apply(multiInitVar[,2,],1,sum,na.rm=T)>0 &
                  apply(multiInitVar[,5,],1,sum,na.rm=T)>0)
 ###select just 100 sites for test runs 
 if(testRun){
-  siteX = siteX[1:100]
+#  siteX = siteX[1:100]
+# select 25 sites from each region
+  siteX = c(got_m[1:25], svea_m[1:25], sn_m[1:25], nn_m[1:25])
 } 
 
 InitialX <- Initial[siteX,]
@@ -181,4 +183,4 @@ if(fromPlant){
 
 
 #save(initPrebas,file = "rdata/initPrebas.rdata")
-
+#save(InitialX, file="rdata/InitialX.rdata")

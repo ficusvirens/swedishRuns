@@ -21,15 +21,6 @@ weatherFile <- "rdata/weather150.rdata" ###weather input file
 
 # load the regions of Sweden
 load("rdata/mineral_regions.rdata")
-plot_area <- mineral # set the region to plot here: alternatives are
-                        # mineral = whole Sweden
-                        # got_m = Götaland
-                        # svea_m = Svealand
-                        # sn_m = Södra Norrland
-                        # nn_m = Norra Norrland
-                    # all areas are only mineral sites
-
-
 
 outFile <- "rdata/runs/output.rdata" # output file normal run
 outFile1.5 <- "rdata/runs/output1_5.rdata" # output file 1.5 x run 
@@ -55,5 +46,21 @@ devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
 
 library(Rprebasso)
 
-
 source("functions.r")
+
+# -------- settings for plots -----------
+plot_area <- mineral # set the region to plot here: alternatives are
+# mineral = whole Sweden
+# got_m = Götaland
+# svea_m = Svealand
+# sn_m = Södra Norrland
+# nn_m = Norra Norrland
+# all areas are only mineral sites
+# some plots include all the regions; this setting does not alter them
+
+plot_run <- output # set the simulation run to plot here: alternatives are
+# output = normal run with tapio rules (no separate harvest limit)
+# output_1.5 = run with 1.5x rotation time but no more than simulation time
+# output_max = run with rotation time that is maximum between tapio rules
+#               clearcut timing and stand age, though no more than simulation time
+# some plots include all the runs; this setting does not alter them

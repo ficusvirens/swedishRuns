@@ -256,4 +256,10 @@ regionName <- function(region) {
   else if(identical(region, nn_m)) return("Norra Norrland")
 }
 
+simName <- function(simulation) {
+  if(identical(simulation, output)) return("")
+  else if(identical(simulation, output_1.5)) return(", 1.5x rotation length")
+  else if(identical(simulation, output_max)) return(", max rotation length")
+}
+
 # dev.off()

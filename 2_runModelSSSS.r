@@ -1,7 +1,9 @@
 #load("rdata/initPrebas.rdata")
 
 # run model
-output <- multiPrebas(initPrebas)
+if(CSCrun) {
+  output <- regionPrebas(initPrebas)
+} else output <- multiPrebas(initPrebas)
 
 nSites <- output$nSites
 simLength <- simulationLength(output)
@@ -35,12 +37,14 @@ if(!CSCrun) {
   output <- list(multiOut=output$multiOut,GVout=output$GVout,
                  nSites=output$nSites,fAPAR=output$fAPAR,
                  siteInfo=output$siteInfo,weatherYasso=output$weatherYasso, 
-                 litterSize=output$litterSize)
+                 litterSize=output$litterSize,multiInitVar=output$multiInitVar)
   gc()
 }
 
 # run model for 1.5x
-output_1.5 <- multiPrebas(initPrebas1.5)
+if(CSCrun) {
+  output_1.5 <- regionPrebas(initPrebas1.5)
+} else output_1.5 <- multiPrebas(initPrebas1.5)
 
 # make output lighter
 if(!CSCrun) {
@@ -49,12 +53,14 @@ if(!CSCrun) {
   output_1.5 <- list(multiOut=output_1.5$multiOut,GVout=output_1.5$GVout,
                  nSites=output_1.5$nSites,fAPAR=output_1.5$fAPAR,
                  siteInfo=output_1.5$siteInfo,weatherYasso=output_1.5$weatherYasso,
-                 litterSize=output_1.5$litterSize)
+                 litterSize=output_1.5$litterSize,multiInitVar=output_1.5$multiInitVar)
   gc()
 }
 
 # run model for max
-output_max <- multiPrebas(initPrebasMax)
+if(CSCrun) {
+  output_max <- regionPrebas(initPrebasMax)
+} else output_max <- multiPrebas(initPrebasMax)
 
 # make output lighter
 if(!CSCrun) {
@@ -63,7 +69,7 @@ if(!CSCrun) {
   output_max <- list(multiOut=output_max$multiOut,GVout=output_max$GVout,
                      nSites=output_max$nSites,fAPAR=output_max$fAPAR,
                      siteInfo=output_max$siteInfo,weatherYasso=output_max$weatherYasso,
-                     litterSize=output_max$litterSize)
+                     litterSize=output_max$litterSize,multiInitVar=output_max$multiInitVar)
   gc()
 }
 
