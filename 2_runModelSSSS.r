@@ -34,7 +34,8 @@ if(!CSCrun) {
   
   output <- list(multiOut=output$multiOut,GVout=output$GVout,
                  nSites=output$nSites,fAPAR=output$fAPAR,
-                 siteInfo=output$siteInfo,weatherYasso=output$weatherYasso)
+                 siteInfo=output$siteInfo,weatherYasso=output$weatherYasso, 
+                 litterSize=output$litterSize)
   gc()
 }
 
@@ -47,7 +48,8 @@ if(!CSCrun) {
   
   output_1.5 <- list(multiOut=output_1.5$multiOut,GVout=output_1.5$GVout,
                  nSites=output_1.5$nSites,fAPAR=output_1.5$fAPAR,
-                 siteInfo=output_1.5$siteInfo,weatherYasso=output_1.5$weatherYasso)
+                 siteInfo=output_1.5$siteInfo,weatherYasso=output_1.5$weatherYasso,
+                 litterSize=output_1.5$litterSize)
   gc()
 }
 
@@ -60,10 +62,12 @@ if(!CSCrun) {
   
   output_max <- list(multiOut=output_max$multiOut,GVout=output_max$GVout,
                      nSites=output_max$nSites,fAPAR=output_max$fAPAR,
-                     siteInfo=output_max$siteInfo,weatherYasso=output_max$weatherYasso)
+                     siteInfo=output_max$siteInfo,weatherYasso=output_max$weatherYasso,
+                     litterSize=output_max$litterSize)
   gc()
 }
 
 #save(output, file=outFile)
 #save(output_1.5, file=outFile1.5)
 #save(output_max, file=outFileMax)
+

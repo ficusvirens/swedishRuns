@@ -15,8 +15,10 @@ library(plyr)
 multiLayer = TRUE
 fromPlant = TRUE
 CSCrun = FALSE
-testRun = F  ###set to True if you want to make a test run
+testRun = T  ###set to True if you want to make a test run
 simRuns = 100 ####years of simulations
+weatherFile <- "rdata/weather150.rdata" ###weather input file
+
 # load the regions of Sweden
 load("rdata/mineral_regions.rdata")
 plot_area <- mineral # set the region to plot here: alternatives are
@@ -27,17 +29,17 @@ plot_area <- mineral # set the region to plot here: alternatives are
                         # nn_m = Norra Norrland
                     # all areas are only mineral sites
 
-weatherFile <- "rdata/weather100.rdata" ###weather input file
 
-outFile <- "rdata/100runs/output.rdata" # output file normal run
-outFile1.5 <- "rdata/100runs/output1_5.rdata" # output file 1.5 x run 
-outFileMax <- "rdata/100runs/outputMax.rdata" # output file max run
-outFileSoilC <- "rdata/100runs/soilC.rdata" # output file with soilC results
+
+outFile <- "rdata/runs/output.rdata" # output file normal run
+outFile1.5 <- "rdata/runs/output1_5.rdata" # output file 1.5 x run 
+outFileMax <- "rdata/runs/outputMax.rdata" # output file max run
+outFileSoilC <- "rdata/runs/soilC.rdata" # output file with soilC results
 
 timeSpaceRuns <- "rdata/5run.rdata" # file with time/space output results
 litterdata <- "rdata/litterdata.rdata" # file with litter data
 
-litterSizeDef[1,1:3] <- c(10,10,5)
+sizeCwoodyLit <- c(10,10,5) #### size coarse woody litter for pine,spruce and birch 
 
 
 if(CSCrun){

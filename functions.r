@@ -44,6 +44,8 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
   Tmean <- weatherYasso[1]
   Precip <- weatherYasso[2]
   Tamp <- weatherYasso[3]
+  litterSize = prebas_output$litterSize
+  
   soilC_lit <- array(NA,dim=c(nSp,5,3),dimnames = list(paste0("spec",1:nSp),
                                                        c("A", "W", "E", "N", "H"),
                                                        c("soilC_nwLit", "soilC_fwLit", "soilC_cwLit"))) # create object for yasso output
@@ -58,20 +60,20 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
     ###litterSize 0, 2, 30 for nwlit, fwlit, cwlit, respectively
     ###litType 1,2,3 for nwlit, fwlit, cwlit, respectively
     soilC_nwLit <- StStYasso(litter = nwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                             Precip = Precip,litterSize = litterSizeDef[3,species[ij]],litType = 1,pYasso = pYAS)
+                             Precip = Precip,litterSize = litterSize[3,species[ij]],litType = 1,pYasso = pYAS)
     soilC_fwLit <- StStYasso(litter = fwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                             Precip = Precip,litterSize = litterSizeDef[2,species[ij]],litType = 2,pYasso = pYAS)
+                             Precip = Precip,litterSize = litterSize[2,species[ij]],litType = 2,pYasso = pYAS)
     soilC_cwLit <- StStYasso(litter = cwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                             Precip = Precip,litterSize = litterSizeDef[1,species[ij]],litType = 3,pYasso = pYAS)
+                             Precip = Precip,litterSize = litterSize[1,species[ij]],litType = 3,pYasso = pYAS)
     
     soilC_lit[ij,,] <- cbind(soilC_nwLit, soilC_fwLit, soilC_cwLit)
   }
-
+  
   if (gvrun == 1) {
-      
+    
     ###calculate steady state C for gv
     fAPAR <- prebas_output$fAPAR
- #   climIDs <- prebas_output$siteInfo[,2]
+    #   climIDs <- prebas_output$siteInfo[,2]
     ets <- prebas_output$multiOut[,,5,1,1]
     siteType <- prebas_output$multiOut[,,3,1,1]
     p0 <- prebas_output$multiOut[,,6,1,1]
@@ -84,18 +86,18 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
     }
     if (only1st == 1) {
       AWENgv2 <- colMeans(AWENgv[,1,],na.rm = T)
-  #    weatherYasso <- prebas_output$weatherYasso[,1,]
+      #    weatherYasso <- prebas_output$weatherYasso[,1,]
     } else {
       AWENgv2 <- apply(AWENgv,3,mean,na.rm=T)
-  #    weatherYasso <- apply(prebas_output$weatherYasso,c(1,3), mean, na.rm=T)
+      #    weatherYasso <- apply(prebas_output$weatherYasso,c(1,3), mean, na.rm=T)
     }
     AWENgv2[which(is.na(AWENgv2),arr.ind = T)] <- 0.
     
     ###calculate steady state soil C per GV
     # ststGV <- matrix(NA,nSites,5)
-#    ststGV <- t(sapply(1:dim(fAPAR)[1], function(ij) .Fortran("mod5c",
-#                                                       pYAS,1.,weatherYasso[climIDs[ij],],rep(0,5),
-#                                                       c(AWENgv2[ij,],0),litterSize=0,leac=0.,rep(0,5),stSt=1.)[[8]]))
+    #    ststGV <- t(sapply(1:dim(fAPAR)[1], function(ij) .Fortran("mod5c",
+    #                                                       pYAS,1.,weatherYasso[climIDs[ij],],rep(0,5),
+    #                                                       c(AWENgv2[ij,],0),litterSize=0,leac=0.,rep(0,5),stSt=1.)[[8]]))
     ststGV <- .Fortran("mod5c", pYAS,1.,weatherYasso,rep(0,5), c(AWENgv2,0),litterSize=0,leac=0.,rep(0,5),stSt=1.)[[8]]
     
   } else {
@@ -164,6 +166,7 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLe
     Tmean <- mean(prebas_output$weatherYasso[climID,,1])
     Precip <- mean(prebas_output$weatherYasso[climID,,2])
     Tamp <- mean(prebas_output$weatherYasso[climID,,3])
+    litterSize <- prebas_output$litterSize
     for(ij in species){
       nwlit <- sum(meansLit[siteX,1:2,ij])   ####non woody litter (foliage + fine root)
       fwlit <- meansLit[siteX,3,ij]  ##fine woody litter (branches)
@@ -171,11 +174,11 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLe
       ###litterSize 0, 2, 30 for nwlit, fwlit, cwlit, respectively
       ###litType 1,2,3 for nwlit, fwlit, cwlit, respectively
       soilC_nwLit <- StStYasso(litter = nwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                               Precip = Precip,litterSize = litterSizeDef[3,species[ij]],litType = 1,pYasso = pYAS)
+                               Precip = Precip,litterSize = litterSize[3,species[ij]],litType = 1,pYasso = pYAS)
       soilC_fwLit <- StStYasso(litter = fwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                               Precip = Precip,litterSize = litterSizeDef[2,species[ij]],litType = 2,pYasso = pYAS)
+                               Precip = Precip,litterSize = litterSize[2,species[ij]],litType = 2,pYasso = pYAS)
       soilC_cwLit <- StStYasso(litter = cwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                               Precip = Precip,litterSize = litterSizeDef[1,species[ij]],litType = 3,pYasso = pYAS)
+                               Precip = Precip,litterSize = litterSize[1,species[ij]],litType = 3,pYasso = pYAS)
       soilC_lit[siteX,ij,,] <- cbind(soilC_nwLit, soilC_fwLit, soilC_cwLit)
       ###GV calculations
       if (gvrun == 1) {
@@ -198,7 +201,7 @@ simulationLength <- function(output) {
   for(i in 1:nrow(sumBA)) {
     simlength[i] <- match(0, sumBA[i,])
   }
-
+  
   return(simlength) 
 }
 
@@ -244,8 +247,7 @@ makePlots <- function(output,siteX=NULL){
   return(list(pH=pH,pD = pD,pB=pB,allPlot=allPlot))
   
 }
-
-
+# dev.off()
 regionName <- function(region) {
   if(identical(region, mineral)) return("Sweden")
   else if(identical(region, got_m)) return("Götaland")

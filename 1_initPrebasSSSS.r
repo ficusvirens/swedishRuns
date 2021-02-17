@@ -4,6 +4,9 @@
 #detach("package:Rprebasso")
 source("settings.r")
 
+litterSize <- litterSizeDef
+litterSize[1,1:3] <- sizeCwoodyLit
+
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
 load('rdata/SWE.par.tair.vpd.precip.RData')
 # this loads the weather inputs
@@ -110,17 +113,9 @@ siteX <- which(apply(multiInitVar[,2,],1,sum,na.rm=T)>0 &
                  apply(multiInitVar[,4,],1,sum,na.rm=T) > 0 &
                  apply(multiInitVar[,5,],1,sum,na.rm=T)>0)
 ###select just 100 sites for test runs 
-if(testRun) siteX = 1:100
-
-
-# to take peatlands out
-#carina <- read.csv("input/skdata_carina.csv")
-#carina$id <- paste(carina$AR, carina$TRAKT, carina$PALSLAG ,sep="")
-#myvars <- c("id", "hist")
-#hist <- carina[myvars]
-#cu <- merge(cu, hist)
-#mineral <- which(cu$hist==0)
-#siteX <- intersect(siteX, mineral)
+if(testRun){
+  siteX = siteX[1:100]
+} 
 
 InitialX <- Initial[siteX,]
 
@@ -137,6 +132,16 @@ multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
 multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
 multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
 
+###proc weather for test sites
+if(testRun){
+  climIDx <- sort(unique(siteInfoX[,2]))
+  siteInfoX[,2] <- match(siteInfoX[,2],climIDx)
+  PAR = PAR[climIDx,]
+  TAir= TAir[climIDx,]
+  VPD= VPD[climIDx,]
+  Precip= Precip[climIDx,]
+  CO2= CO2[climIDx,]
+} 
 
 # multiInitVar2 <- array(0,dim=c(nrow(siteInfo),7,maxNlayers))
 # multiInitVar2[,,1]<-multiInitVar0
@@ -149,7 +154,7 @@ nYears<- rep(simRuns,nrow(siteInfoX))
 initPrebas <- InitMultiSite(nYearsMS = nYears,
                             siteInfo=siteInfoX,
                             # pCROBAS = pCrobas, #soil information haven't been considered
-                            # litterSize = litterSize,
+                            litterSize = litterSize,
                             # pAWEN = parsAWEN,
                             #defaultThin=0.,
                             #ClCut = 0.,
@@ -176,3 +181,4 @@ if(fromPlant){
 
 
 #save(initPrebas,file = "rdata/initPrebas.rdata")
+
