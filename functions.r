@@ -36,7 +36,6 @@ subSetInitPrebas <- function(siteX,defaultThin=0.,ClCut=0.){
 
 # counts the soil carbon in steady state for region
 countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
-  
   meansLit <- colMeans(prebas_output$multiOut[,1,26:29,,1]) ###Calculate the mean for the first year
   nSp <- length(species)
   litForStst <- matrix(0,nSp,3)    ####object for litterfall at steady state
@@ -44,12 +43,9 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
   Tmean <- weatherYasso[1]
   Precip <- weatherYasso[2]
   Tamp <- weatherYasso[3]
-  litterSize = prebas_output$litterSize
-  
   soilC_lit <- array(NA,dim=c(nSp,5,3),dimnames = list(paste0("spec",1:nSp),
                                                        c("A", "W", "E", "N", "H"),
                                                        c("soilC_nwLit", "soilC_fwLit", "soilC_cwLit"))) # create object for yasso output
-  
   for(ij in species){
     litForStst[ij,1] <- sum(meansLit[1:2,ij])   ####non woody littter (foliage + fine root)
     litForStst[ij,2] <- meansLit[3,ij]  ##fine woody litter (branches)
@@ -60,17 +56,14 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
     ###litterSize 0, 2, 30 for nwlit, fwlit, cwlit, respectively
     ###litType 1,2,3 for nwlit, fwlit, cwlit, respectively
     soilC_nwLit <- StStYasso(litter = nwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                             Precip = Precip,litterSize = litterSize[3,species[ij]],litType = 1,pYasso = pYAS)
+                             Precip = Precip,litterSize = litterSizeDef[3,species[ij]],litType = 1,pYasso = pYAS)
     soilC_fwLit <- StStYasso(litter = fwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                             Precip = Precip,litterSize = litterSize[2,species[ij]],litType = 2,pYasso = pYAS)
+                             Precip = Precip,litterSize = litterSizeDef[2,species[ij]],litType = 2,pYasso = pYAS)
     soilC_cwLit <- StStYasso(litter = cwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                             Precip = Precip,litterSize = litterSize[1,species[ij]],litType = 3,pYasso = pYAS)
-    
+                             Precip = Precip,litterSize = litterSizeDef[1,species[ij]],litType = 3,pYasso = pYAS)
     soilC_lit[ij,,] <- cbind(soilC_nwLit, soilC_fwLit, soilC_cwLit)
   }
-  
   if (gvrun == 1) {
-    
     ###calculate steady state C for gv
     fAPAR <- prebas_output$fAPAR
     #   climIDs <- prebas_output$siteInfo[,2]
@@ -82,7 +75,7 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
     for(ij in 1:dim(fAPAR)[2]){
       AWENgv[,ij,] <- t(sapply(1:nrow(fAPAR), function(i) .Fortran("fAPARgv",fAPAR[i,ij],
                                                                    ets[i,ij],siteType[ij],
-                                                                   0,0,p0[ij,1],rep(0,4))[[7]]))
+                                                                   0,0,p0[i,ij],rep(0,4))[[7]]))
     }
     if (only1st == 1) {
       AWENgv2 <- colMeans(AWENgv[,1,],na.rm = T)
@@ -92,24 +85,17 @@ countSoilC <- function(prebas_output, species, only1st = 1, gvrun = 1) {
       #    weatherYasso <- apply(prebas_output$weatherYasso,c(1,3), mean, na.rm=T)
     }
     AWENgv2[which(is.na(AWENgv2),arr.ind = T)] <- 0.
-    
     ###calculate steady state soil C per GV
     # ststGV <- matrix(NA,nSites,5)
     #    ststGV <- t(sapply(1:dim(fAPAR)[1], function(ij) .Fortran("mod5c",
     #                                                       pYAS,1.,weatherYasso[climIDs[ij],],rep(0,5),
     #                                                       c(AWENgv2[ij,],0),litterSize=0,leac=0.,rep(0,5),stSt=1.)[[8]]))
     ststGV <- .Fortran("mod5c", pYAS,1.,weatherYasso,rep(0,5), c(AWENgv2,0),litterSize=0,leac=0.,rep(0,5),stSt=1.)[[8]]
-    
   } else {
     ststGV = NA
   }
-  
-  
   return(list(treeLitter = soilC_lit, gvLitter = ststGV))
 }
-
-
-
 # counts the soil carbon in steady state site spesific
 countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLength=NA) {
   ### prebas_output = output object of PREBAS simulations
@@ -122,11 +108,9 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLe
   nSites <- prebas_output$nSites
   if(all(is.na(rotLength)) | all(is.na(simLength))) {
     rotFactor = rep(1, nSites)
-  }
-  else {
+  } else {
     rotFactor <- simLength/rotLength
   }
-  
   nSp <- length(species)
   if(all(is.na(simLength))){
     meansLit <- apply(prebas_output$multiOut[,,26:29,,1], c(1,3,4), mean) ###Calculate the mean for the first year
@@ -149,7 +133,7 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLe
     for(ij in 1:dim(fAPAR)[2]){
       AWENgv[,ij,] <- t(sapply(1:nrow(fAPAR), function(i) .Fortran("fAPARgv",fAPAR[i,ij],
                                                                    ets[i,ij],siteType[ij],
-                                                                   0,0,p0[ij,1],rep(0,4))[[7]]))
+                                                                   0,0,p0[i,ij],rep(0,4))[[7]]))
     }
     AWENgv2 <- apply(AWENgv,c(1,3),mean,na.rm=T)*rotFactor
     AWENgv2[which(is.na(AWENgv2),arr.ind = T)] <- 0.
@@ -166,7 +150,6 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLe
     Tmean <- mean(prebas_output$weatherYasso[climID,,1])
     Precip <- mean(prebas_output$weatherYasso[climID,,2])
     Tamp <- mean(prebas_output$weatherYasso[climID,,3])
-    litterSize <- prebas_output$litterSize
     for(ij in species){
       nwlit <- sum(meansLit[siteX,1:2,ij])   ####non woody litter (foliage + fine root)
       fwlit <- meansLit[siteX,3,ij]  ##fine woody litter (branches)
@@ -174,11 +157,11 @@ countSoilCstsp <- function(prebas_output, species, gvrun = 1,rotLength=NA, simLe
       ###litterSize 0, 2, 30 for nwlit, fwlit, cwlit, respectively
       ###litType 1,2,3 for nwlit, fwlit, cwlit, respectively
       soilC_nwLit <- StStYasso(litter = nwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                               Precip = Precip,litterSize = litterSize[3,species[ij]],litType = 1,pYasso = pYAS)
+                               Precip = Precip,litterSize = litterSizeDef[3,species[ij]],litType = 1,pYasso = pYAS)
       soilC_fwLit <- StStYasso(litter = fwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                               Precip = Precip,litterSize = litterSize[2,species[ij]],litType = 2,pYasso = pYAS)
+                               Precip = Precip,litterSize = litterSizeDef[2,species[ij]],litType = 2,pYasso = pYAS)
       soilC_cwLit <- StStYasso(litter = cwlit,parsAWEN = parsAWEN,spec = species[ij],Tmean = Tmean,Tamp = Tamp,
-                               Precip = Precip,litterSize = litterSize[1,species[ij]],litType = 3,pYasso = pYAS)
+                               Precip = Precip,litterSize = litterSizeDef[1,species[ij]],litType = 3,pYasso = pYAS)
       soilC_lit[siteX,ij,,] <- cbind(soilC_nwLit, soilC_fwLit, soilC_cwLit)
       ###GV calculations
       if (gvrun == 1) {
@@ -247,7 +230,7 @@ makePlots <- function(output,siteX=NULL){
   return(list(pH=pH,pD = pD,pB=pB,allPlot=allPlot))
   
 }
-# dev.off()
+# returns the region name
 regionName <- function(region) {
   if(identical(region, mineral)) return("Sweden")
   else if(identical(region, got_m)) return("Götaland")
@@ -256,10 +239,65 @@ regionName <- function(region) {
   else if(identical(region, nn_m)) return("Norra Norrland")
 }
 
+
 simName <- function(simulation) {
   if(identical(simulation, output)) return("")
   else if(identical(simulation, output_1.5)) return(", 1.5x rotation length")
   else if(identical(simulation, output_max)) return(", max rotation length")
 }
+
+# returns the right output for selected run
+select_plotrun <- function(prun) {
+  if(prun == "normal") return(output)
+  else if(prun == "1.5") return(output_1.5)
+  else if(prun == "max") return(output_max)
+}
+
+# returns the prebas space/time soil C values for given region 
+soilC_prebasST <- function(region) {
+  if(identical(region, mineral)) return(c(c_m, c_m0))
+  else if(identical(region, got_m)) return(c(c_got, c_got0))
+  else if(identical(region, svea_m)) return(c(c_svea, c_svea0))
+  else if(identical(region, sn_m)) return(c(c_sn, c_sn0))
+  else if(identical(region, nn_m)) return(c(c_nn, c_nn0))
+}
+
+# counts the mean litterfall for each site through rotation time
+meanLitter <- function(output) {
+  fol <- matrix(data=NA, nrow=nSites, ncol=3) # foliage
+  fr <- matrix(data=NA, nrow=nSites, ncol=3) # fine root
+  cw <- matrix(data=NA, nrow=nSites, ncol=3) # coarse woody
+  fw <- matrix(data=NA, nrow=nSites, ncol=3) # fine woody 
+  gv <- vector() # ground veg
+  
+  simLength <- simulationLength(output)
+  rotLength <- rotationLength(output, simLength)  
+  # if rotation length is >100, set it to 100
+  rl_100 <- rotLength
+  rl_100[rl_100>100] <- 100
+  
+  nSites <- output$nSites
+  
+  for (i in 1:nSites) {
+    gv[i] <- sum(output$GVout[i,1:rl_100[i],2])/rl_100[i]
+    fol[i,1:3] <- colSums(output$multiOut[i,1:rl_100[i],26,,1])/rl_100[i]
+    fr[i,1:3] <- colSums(output$multiOut[i,1:rl_100[i],27,,1])/rl_100[i]
+    fw[i,1:3] <- colSums(output$multiOut[i,1:rl_100[i],28,,1])/rl_100[i]
+    cw[i,1:3] <- colSums(output$multiOut[i,1:rl_100[i],29,,1])/rl_100[i]
+  }  
+  
+  species_label = c("pine", "spruce", "deciduous")
+  colnames(fol) <- species_label
+  colnames(fw) <- species_label
+  colnames(cw) <- species_label
+  colnames(fr) <- species_label
+  
+  lit_mx <- list(fol, fr, cw, fw, gv)
+  names(lit_mx) <- c("fol", "fr", "cw", "fw", "gv")
+  
+  return(lit_mx)
+}
+
+
 
 # dev.off()

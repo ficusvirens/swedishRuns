@@ -1,9 +1,11 @@
 #load("rdata/initPrebas.rdata")
 
 # run model
-if(CSCrun) {
-  output <- regionPrebas(initPrebas)
-} else output <- multiPrebas(initPrebas)
+#if(CSCrun) {
+#  output <- regionPrebas(initPrebas)
+#} else output <- multiPrebas(initPrebas)
+output <- multiPrebas(initPrebas)
+
 
 nSites <- output$nSites
 simLength <- simulationLength(output)
@@ -42,9 +44,11 @@ if(!CSCrun) {
 }
 
 # run model for 1.5x
-if(CSCrun) {
-  output_1.5 <- regionPrebas(initPrebas1.5)
-} else output_1.5 <- multiPrebas(initPrebas1.5)
+#if(CSCrun) {
+#  output_1.5 <- regionPrebas(initPrebas1.5)
+#} else output_1.5 <- multiPrebas(initPrebas1.5)
+
+output_1.5 <- multiPrebas(initPrebas1.5)
 
 # make output lighter
 if(!CSCrun) {
@@ -58,9 +62,12 @@ if(!CSCrun) {
 }
 
 # run model for max
-if(CSCrun) {
-  output_max <- regionPrebas(initPrebasMax)
-} else output_max <- multiPrebas(initPrebasMax)
+#if(CSCrun) {
+#  output_max <- regionPrebas(initPrebasMax)
+#} else output_max <- multiPrebas(initPrebasMax)
+
+output_max <- multiPrebas(initPrebasMax)
+
 
 # make output lighter
 if(!CSCrun) {

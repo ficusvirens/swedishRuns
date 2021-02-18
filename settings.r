@@ -16,7 +16,7 @@ multiLayer = TRUE
 fromPlant = TRUE
 CSCrun = FALSE
 testRun = T  ###set to True if you want to make a test run
-simRuns = 100 ####years of simulations
+simRuns = 150 ####years of simulations
 weatherFile <- "rdata/weather150.rdata" ###weather input file
 
 # load the regions of Sweden
@@ -39,14 +39,13 @@ if(CSCrun){
 }
 
 species <- 1:3
-
+source("functions.r")
 vPREBAS <- "master"   #### choose PREBAS verson to run the model  "master" or "v0.2.x"
 #vPREBAS <- "v0.2.x"   #### choose PREBAS verson to run the model  "master"
 devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
-
 library(Rprebasso)
 
-source("functions.r")
+
 
 # -------- settings for plots -----------
 plot_area <- mineral # set the region to plot here: alternatives are
@@ -58,9 +57,10 @@ plot_area <- mineral # set the region to plot here: alternatives are
 # all areas are only mineral sites
 # some plots include all the regions; this setting does not alter them
 
-plot_run <- output # set the simulation run to plot here: alternatives are
-# output = normal run with tapio rules (no separate harvest limit)
-# output_1.5 = run with 1.5x rotation time but no more than simulation time
-# output_max = run with rotation time that is maximum between tapio rules
+#FIX THIS
+plotrun <- "normal" # set the simulation run to plot here: alternatives are
+# "normal" = normal run with tapio rules (no separate harvest limit)
+# "1.5" = run with 1.5x rotation time but no more than simulation time
+# "max" = run with rotation time that is maximum between tapio rules
 #               clearcut timing and stand age, though no more than simulation time
 # some plots include all the runs; this setting does not alter them
