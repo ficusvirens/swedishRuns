@@ -6,18 +6,31 @@
 #load(outFile)
 #load(outFile1.5)
 #load(outFileMax)
-#load("rdata/InitialX.rdata")
+#load("rdata/Initial.rdata")
 load(litterdata)
 
 # ----- general data -----
+plot_run <- select_plotrun(plotrun)
 nSites <- plot_run$nSites
 simLength_prun <- simulationLength(plot_run)
 rotLength_prun <- rotationLength(plot_run, simLength_prun)
-plot_run <- select_plotrun(plotrun)
+
 
 reg_output <- regionPTS(plot_area)
+plot_area_sites <- which(regionID(plot_area) %in% InitialX$id)
 
 data_soilC <- InitialX$c.tot.tha/10
+
+#---- regions -------
+load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
+Initial<-cu
+InitialX <- Initial[siteX,]
+got <- which(got_id %in% InitialX$id)
+svea <- which(svea_id %in% InitialX$id)
+sn <- which(sn_id %in% InitialX$id)
+nn <- which(nn_id %in% InitialX$id)
+sweden <- which(mineral_id %in% InitialX$id)
+
 
 
 # -------- colors ---------------
@@ -48,8 +61,8 @@ litter.origX[is.na(litter.origX)]=0
 # ---- soil C with different rotation lengths ---
 pst_line <- soilC_prebasST(plot_area)
 
-boxplot(data_soilC[plot_area], soilCstst[plot_area], 
-        soilCstst1.5[plot_area], soilCststMax[plot_area], 
+boxplot(data_soilC[plot_area_sites], soilCstst[plot_area_sites], 
+        soilCstst1.5[plot_area_sites], soilCststMax[plot_area_sites], 
         main = c("Soil C in ", paste0(regionName(plot_area))),
         names = rotLength_label, 
         ylab = "kg/m2", 
@@ -68,9 +81,9 @@ for(i in 1:nSites) {
   harvMean[i] <- sum(plot_run$multiOut[i,1:simLength_prun[i],37,,1])/rotLength_prun[i]
 }
 
-boxplot(harvMean[got_m], harvMean[svea_m], 
-        harvMean[sn_m],harvMean[nn_m],
-        harvMean[mineral],
+boxplot(harvMean[got], harvMean[svea], 
+        harvMean[sn],harvMean[nn],
+        harvMean[sweden],
         main = c("Harvest levels in Sweden (Prebas)",paste0(simName(plot_run))), 
         ylab = "m3/ha", 
         names = regs_label)
@@ -123,9 +136,9 @@ y03s <- thin_per_ha$X2003
 # 2013
 y13s <- thin_per_ha$X2013
 
-boxplot(thinMean[got_m], thinMean[svea_m], 
-        thinMean[sn_m], thinMean[nn_m],
-        thinMean[mineral],
+boxplot(thinMean[got], thinMean[svea], 
+        thinMean[sn], thinMean[nn],
+        thinMean[sweden],
         main = c("Thinning levels in Sweden (Prebas)",paste0(simName(plot_run))),
         ylab = "m3/ha", 
         names = regs_label)
@@ -160,9 +173,9 @@ y03s <- ff_per_ha$X2003
 # 2013
 y13s <- ff_per_ha$X2013
 
-boxplot(ccMean[got_m], ccMean[svea_m], 
-        ccMean[sn_m], ccMean[nn_m],
-        ccMean[mineral],
+boxplot(ccMean[got], ccMean[svea], 
+        ccMean[sn], ccMean[nn],
+        ccMean[sweden],
         main = c("Final Felling levels in Sweden (Prebas)",paste0(simName(plot_run))),
         ylab = "m3/ha", 
         names = regs_label)
@@ -190,27 +203,28 @@ cw_pts <- rowSums(reg_output$multiOut[,1,29,,1])
 gv_pts <- reg_output$GVout[,1,2]
   
 # litter from data
-fol_d <- litter.origX[plot_area,]$lit.foliage.tot/2 # foliage
-fr_d <- litter.origX[plot_area,]$lit.foliage.tot/2 # fine root
-fw_d <- (litter.origX[plot_area,]$lit.root.tot+
-           litter.origX[plot_area,]$lit.branch.tot)/2 # fine woody
-cw_d <- (litter.origX[plot_area,]$lit.stump.tot+
-           litter.origX[plot_area,]$lit.stem.tot)/2 # coarse woody
-gv_d <- rowSums(gv.biomlitX[plot_area,2:17]) # ground vegetation
+fol_d <- litter.origX[plot_area_sites,]$lit.foliage.tot/2 # foliage
+fr_d <- litter.origX[plot_area_sites,]$lit.foliage.tot/2 # fine root
+fw_d <- (litter.origX[plot_area_sites,]$lit.root.tot+
+           litter.origX[plot_area_sites,]$lit.branch.tot)/2 # fine woody
+cw_d <- (litter.origX[plot_area_sites,]$lit.stump.tot+
+           litter.origX[plot_area_sites,]$lit.stem.tot)/2 # coarse woody
+gv_d <- rowSums(gv.biomlitX[plot_area_sites,2:17]) # ground vegetation
 
 
-boxplot(fol_d, fol_pts, rowSums(litter$fol[plot_area,]), 
-        rowSums(litter1.5$fol[plot_area,]), rowSums(litterMax$fol[plot_area,]),
-        fr_d, fr_pts, rowSums(litter$fr[plot_area,]),
-        rowSums(litter1.5$fr[plot_area,]), rowSums(litterMax$fr[plot_area,]),
-        fw_d, fw_pts, rowSums(litter$fw[plot_area,]),
-        rowSums(litter1.5$fw[plot_area,]), rowSums(litterMax$fw[plot_area,]),
-        cw_d, cw_pts, rowSums(litter$cw[plot_area,]),
-        rowSums(litter1.5$cw[plot_area,]), rowSums(litterMax$cw[plot_area,]),
-        gv_d, gv_pts, litter$gv[plot_area], 
-        litter1.5$gv[plot_area], litterMax$gv[plot_area], 
+boxplot(fol_d, fol_pts, rowSums(litter$fol[plot_area_sites,]), 
+        rowSums(litter1.5$fol[plot_area_sites,]), rowSums(litterMax$fol[plot_area_sites,]),
+        fr_d, fr_pts, rowSums(litter$fr[plot_area_sites,]),
+        rowSums(litter1.5$fr[plot_area_sites,]), rowSums(litterMax$fr[plot_area_sites,]),
+        fw_d, fw_pts, rowSums(litter$fw[plot_area_sites,]),
+        rowSums(litter1.5$fw[plot_area_sites,]), rowSums(litterMax$fw[plot_area_sites,]),
+        cw_d, cw_pts, rowSums(litter$cw[plot_area_sites,]),
+        rowSums(litter1.5$cw[plot_area_sites,]), rowSums(litterMax$cw[plot_area_sites,]),
+        gv_d, gv_pts, litter$gv[plot_area_sites], 
+        litter1.5$gv[plot_area_sites], litterMax$gv[plot_area_sites], 
         main = c("Litter ",paste0(regionName(plot_area))), 
         names = litter_label_5empty, ylim=c(0,2000), 
         ylab = "kg C / ha", col = myCols5)
 legend("topright", fill = myCols5, 
        legend = tupek_prebas_rot_label, horiz = F)
+

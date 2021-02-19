@@ -232,11 +232,20 @@ makePlots <- function(output,siteX=NULL){
 }
 # returns the region name
 regionName <- function(region) {
-  if(identical(region, mineral)) return("Sweden")
-  else if(identical(region, got_m)) return("Götaland")
-  else if(identical(region, svea_m)) return("Svealand")
-  else if(identical(region, sn_m)) return("Södra Norrland")
-  else if(identical(region, nn_m)) return("Norra Norrland")
+  if(identical(region, "Sweden")) return("Sweden")
+  else if(identical(region, "GOT")) return("Götaland")
+  else if(identical(region, "SVEA")) return("Svealand")
+  else if(identical(region, "SN")) return("Södra Norrland")
+  else if(identical(region, "NN")) return("Norra Norrland")
+}
+
+# returns the region output
+regionPTS <- function(region) {
+  if(identical(region, "Sweden")) return(output_m)
+  else if(identical(region, "GOT")) return(output_got)
+  else if(identical(region, "SVEA")) return(output_svea)
+  else if(identical(region, "SN")) return(output_sn)
+  else if(identical(region, "NN")) return(output_nn)
 }
 
 
@@ -255,11 +264,20 @@ select_plotrun <- function(prun) {
 
 # returns the prebas space/time soil C values for given region 
 soilC_prebasST <- function(region) {
-  if(identical(region, mineral)) return(c(c_m, c_m0))
-  else if(identical(region, got_m)) return(c(c_got, c_got0))
-  else if(identical(region, svea_m)) return(c(c_svea, c_svea0))
-  else if(identical(region, sn_m)) return(c(c_sn, c_sn0))
-  else if(identical(region, nn_m)) return(c(c_nn, c_nn0))
+  if(identical(region, "Sweden")) return(c(c_m, c_m0))
+  else if(identical(region, "GOT")) return(c(c_got, c_got0))
+  else if(identical(region, "SVEA")) return(c(c_svea, c_svea0))
+  else if(identical(region, "SN")) return(c(c_sn, c_sn0))
+  else if(identical(region, "NN")) return(c(c_nn, c_nn0))
+}
+
+# returns the region site id's  
+regionID <- function(region) {
+  if(identical(region, "Sweden")) return(mineral_id)
+  else if(identical(region, "GOT")) return(got_id)
+  else if(identical(region, "SVEA")) return(svea_id)
+  else if(identical(region, "SN")) return(sn_id)
+  else if(identical(region, "NN")) return(nn_id)
 }
 
 # counts the mean litterfall for each site through rotation time

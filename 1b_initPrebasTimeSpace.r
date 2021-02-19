@@ -113,21 +113,26 @@ siteX <- which(apply(multiInitVar[,2,],1,sum,na.rm=T)>0 &
                  apply(multiInitVar[,4,],1,sum,na.rm=T) > 0 &
                  apply(multiInitVar[,5,],1,sum,na.rm=T)>0)
 
-InitialB <- Initial[siteX,]
-got <- which(InitialB$id %in% got_id)
-svea <- which(InitialB$id %in% svea_id)
-sn <- which(InitialB$id %in% sn_id)
-nn <- which(InitialB$id %in% nn_id)
-sweden <- which(InitialB$id %in% mineral_id)
+InitialX <- Initial[siteX,]
+got <- which(InitialX$id %in% got_id)
+svea <- which(InitialX$id %in% svea_id)
+sn <- which(InitialX$id %in% sn_id)
+nn <- which(InitialX$id %in% nn_id)
+sweden <- which(InitialX$id %in% mineral_id)
 
 
 
 ###select just 100 sites for test runs 
 if(testRun){
-#  siteX = siteX[1:100]
-# select 25 sites from each region
+  #  siteX = siteX[1:100]
+  # select 25 sites from each region
   siteX = c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
-} 
+  got = got[1:25]
+  svea = svea[1:25]
+  sn = sn[1:25]
+  nn = nn[1:25]
+  sweden = siteX
+}  
 
 InitialX <- Initial[siteX,]
 
@@ -155,11 +160,15 @@ if(testRun){
   CO2= CO2[climIDx,]
 } 
 
-# run for simRuns years
-nYears<- rep(simRuns,nrow(siteInfoX))
+# run for simRunsTS years
+nYears<- rep(simRunsTS,nrow(siteInfoX))
 
+initPrebas_got <- subSetInitPrebas(got,defaultThin = def_thin,ClCut = cl_cut)
+initPrebas_svea <- subSetInitPrebas(svea,defaultThin = def_thin,ClCut = cl_cut)
+initPrebas_sn <- subSetInitPrebas(sn,defaultThin = def_thin,ClCut = cl_cut)
+initPrebas_nn <- subSetInitPrebas(nn,defaultThin = def_thin,ClCut = cl_cut)
 
-initPrebas <- InitMultiSite(nYearsMS = nYears,
+initPrebas_m <- InitMultiSite(nYearsMS = nYears,
                             siteInfo=siteInfoX,
                             # pCROBAS = pCrobas, #soil information haven't been considered
                             litterSize = litterSize,
@@ -180,14 +189,7 @@ initPrebas <- InitMultiSite(nYearsMS = nYears,
                             # multiNthin = multiNthin
 )
 
-#####assign the age at the beginning of rotation
-if(fromPlant){
-  initPrebas$multiInitVar[,2,1] <- initPrebas$multiInitVar[,2,2] <- 
-    initPrebas$multiInitVar[,2,3] <- round(6 + 2* initPrebas$siteInfo[,3] - 
-                                             0.005*rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]] + 2.25)
-}
+#save(initPrebas_got, initPrebas_svea, initPrebas_sn,
+#  initPrebas_nn, initPrebas_m,file = "rdata/runs/initPrebas_ts.rdata")
 
-
-#save(initPrebas,file = "rdata/initPrebas.rdata")
-#save(InitialX, file="rdata/InitialX.rdata")
 

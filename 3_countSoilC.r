@@ -2,6 +2,7 @@
 #load(outfile)
 #load(outFile1.5)
 #load(outFileMax)
+#load(outFileTS)
 
 
 simLength <- simulationLength(output)

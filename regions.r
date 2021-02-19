@@ -1,7 +1,8 @@
 library(sf)
-library(tidyverse)
+#library(tidyverse)
 library(mapview)
 library(rgeos)
+library(dplyr)
 
 sweden_lan <- st_read("shapefiles/LanSweref99TM/Lan_Sweref99TM_region.shp")
 sweden_kommun <- st_read("shapefiles/KommunSweref99TM/Kommun_Sweref99TM_region.shp")
@@ -106,3 +107,39 @@ regions$sn <- sn$number
 
 #save(regions, file = "rdata/regions.rdata")
 
+which(svea$id %in% InitialX$id)
+
+# mineral soils / peatlands
+carina <- read.csv("input/skdata_carina.csv")
+
+carina$id <- paste(carina$AR, carina$TRAKT, carina$PALSLAG ,sep="")
+
+myvars <- c("id", "hist")
+hist <- carina[myvars]
+
+cu <- merge(cu, hist)
+
+
+mineral_sites <- which(cu$hist==0)
+
+
+mineral <- intersect(mineral, siteX)
+mineral <- intersect(mineral, all_plots$number)
+
+peat <- which(cu$hist==1)
+peat <- intersect(peat, siteX)
+peat <- intersect(peat, all_plots$number)
+
+# meillä näyttäisi olevan melkein 400 koealaa joiden sijainti ei ole tiedossa
+length(intersect(siteX, all_plots$number))
+length(siteX)
+
+
+mineral_id <- cu[mineral_sites,]$id
+got_id <- intersect(got$id, mineral_id)
+svea_id <- intersect(svea$id, mineral_id)
+sn_id <- intersect(sn$id, mineral_id)
+nn_id <- intersect(nn$id, mineral_id)
+
+#save(mineral_id, got_id, svea_id, sn_id, nn_id, file="rdata/region_ids.rdata")
+#save(mineral, peat, file="rdata/peatlands.rdata")
