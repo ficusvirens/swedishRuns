@@ -17,7 +17,7 @@ subSetInitPrebas <- function(siteX,defaultThin=0.,ClCut=0.){
                                # pAWEN = parsAWEN,
                                defaultThin=defaultThin,
                                ClCut = ClCut,
-                               multiInitVar = multiInitVarX[siteX,,],
+                               multiInitVar = multiInitVar[siteX,,],
                                # multiInitVar = multiInitVar2,
                                PAR = PARx,
                                TAir= TAirx,

@@ -113,26 +113,32 @@ siteX <- which(apply(multiInitVar[,2,],1,sum,na.rm=T)>0 &
                  apply(multiInitVar[,4,],1,sum,na.rm=T) > 0 &
                  apply(multiInitVar[,5,],1,sum,na.rm=T)>0)
 
-InitialX <- Initial[siteX,]
-got <- which(InitialX$id %in% got_id)
-svea <- which(InitialX$id %in% svea_id)
-sn <- which(InitialX$id %in% sn_id)
-nn <- which(InitialX$id %in% nn_id)
-sweden <- which(InitialX$id %in% mineral_id)
+
+gotX <- intersect(Initial[siteX]$id, got_id)
+sveaX <- intersect(Initial[siteX]$id, svea_id)
+snX <- intersect(Initial[siteX]$id, sn_id)
+nnX <- intersect(Initial[siteX]$id, nn_id)
+swedenX <- intersect(Initial[siteX]$id, mineral_id)
+
+
+got <- which(Initial$id %in% gotX)
+svea <- which(Initial$id %in% sveaX)
+sn <- which(Initial$id %in% snX)
+nn <- which(Initial$id %in% nnX)
+sweden <- which(Initial$id %in% swedenX)
 
 
 
-###select just 100 sites for test runs 
-if(testRun){
-  #  siteX = siteX[1:100]
-  # select 25 sites from each region
-  siteX = c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
-  got = got[1:25]
-  svea = svea[1:25]
-  sn = sn[1:25]
-  nn = nn[1:25]
-  sweden = siteX
-}  
+##select just 100 sites for test runs 
+#if(testRun){
+#  # select 25 sites from each region
+#  siteX <- c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
+#  got <- got[1:25]
+#  svea <- svea[1:25]
+#  sn <- sn[1:25]
+#  nn <- nn[1:25]
+#  sweden <- siteX
+#}  
 
 InitialX <- Initial[siteX,]
 
@@ -149,45 +155,16 @@ multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
 multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
 multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
 
-###proc weather for test sites
-if(testRun){
-  climIDx <- sort(unique(siteInfoX[,2]))
-  siteInfoX[,2] <- match(siteInfoX[,2],climIDx)
-  PAR = PAR[climIDx,]
-  TAir= TAir[climIDx,]
-  VPD= VPD[climIDx,]
-  Precip= Precip[climIDx,]
-  CO2= CO2[climIDx,]
-} 
-
 # run for simRunsTS years
-nYears<- rep(simRunsTS,nrow(siteInfoX))
+nYears<- rep(simRunsTS,nrow(siteInfo))
 
 initPrebas_got <- subSetInitPrebas(got,defaultThin = def_thin,ClCut = cl_cut)
 initPrebas_svea <- subSetInitPrebas(svea,defaultThin = def_thin,ClCut = cl_cut)
 initPrebas_sn <- subSetInitPrebas(sn,defaultThin = def_thin,ClCut = cl_cut)
 initPrebas_nn <- subSetInitPrebas(nn,defaultThin = def_thin,ClCut = cl_cut)
 
-initPrebas_m <- InitMultiSite(nYearsMS = nYears,
-                            siteInfo=siteInfoX,
-                            # pCROBAS = pCrobas, #soil information haven't been considered
-                            litterSize = litterSize,
-                            # pAWEN = parsAWEN,
-                            defaultThin=def_thin,
-                            ClCut = cl_cut,
-                            multiInitVar = multiInitVarX,
-                            # multiInitVar = multiInitVar2,
-                            PAR = PAR,
-                            TAir= TAir,
-                            VPD= VPD,
-                            Precip= Precip,
-                            CO2= CO2
-                            #yassoRun = 0.
-                            # lukeRuns = 0
-                            # initCLcutRatio = initCLcutRatio
-                            # multiThin = multiThin,
-                            # multiNthin = multiNthin
-)
+initPrebas_m <- subSetInitPrebas(sweden,defaultThin = def_thin,ClCut = cl_cut)
+
 
 #save(initPrebas_got, initPrebas_svea, initPrebas_sn,
 #  initPrebas_nn, initPrebas_m,file = "rdata/runs/initPrebas_ts.rdata")

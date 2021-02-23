@@ -113,12 +113,19 @@ siteX <- which(apply(multiInitVar[,2,],1,sum,na.rm=T)>0 &
                  apply(multiInitVar[,4,],1,sum,na.rm=T) > 0 &
                  apply(multiInitVar[,5,],1,sum,na.rm=T)>0)
 
-InitialB <- Initial[siteX,]
-got <- which(InitialB$id %in% got_id)
-svea <- which(InitialB$id %in% svea_id)
-sn <- which(InitialB$id %in% sn_id)
-nn <- which(InitialB$id %in% nn_id)
-sweden <- which(InitialB$id %in% mineral_id)
+
+
+gotX <- intersect(Initial[siteX]$id, got_id)
+sveaX <- intersect(Initial[siteX]$id, svea_id)
+snX <- intersect(Initial[siteX]$id, sn_id)
+nnX <- intersect(Initial[siteX]$id, nn_id)
+swedenX <- intersect(Initial[siteX]$id, mineral_id)
+
+got <- which(Initial$id %in% gotX)
+svea <- which(Initial$id %in% sveaX)
+sn <- which(Initial$id %in% snX)
+nn <- which(Initial$id %in% nnX)
+sweden <- which(Initial$id %in% swedenX)
 
 
 
@@ -127,6 +134,12 @@ if(testRun){
 #  siteX = siteX[1:100]
 # select 25 sites from each region
   siteX = c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
+  
+#  load("rdata/mineral_regions.rdata")
+#  siteX = c(got_m[1:25], svea_m[1:25], sn_m[1:25], nn_m[1:24])
+#  siteX <- c(siteX,14)
+  
+#  siteX = sweden[1:100]
 } 
 
 InitialX <- Initial[siteX,]
