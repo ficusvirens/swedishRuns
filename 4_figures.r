@@ -15,12 +15,17 @@ rotLength_prun <- rotationLength(plot_run, simLength_prun)
 
 reg_output <- regionPTS(plot_area)
 
-load("rdata/runs/regs_SSSSrun.rdata")
+load("rdata/runs/InitialX.rdata")
 data_soilC <- InitialX$c.tot.tha/10
 
 #---- regions -------
-
-plot_area_sites <- regionNumbers(plot_area)
+load("rdata/region_ids.rdata")
+plot_area_sites <- which(plot_run$siteInfo[,1] %in% regionID(plot_area))
+got <- which(plot_run$siteInfo[,1] %in% got_id)
+svea <- which(plot_run$siteInfo[,1] %in% svea_id)
+sn <- which(plot_run$siteInfo[,1] %in% sn_id)
+nn <- which(plot_run$siteInfo[,1] %in% nn_id)
+sweden <- which(plot_run$siteInfo[,1] %in% mineral_id)
 
 
 # -------- colors ---------------

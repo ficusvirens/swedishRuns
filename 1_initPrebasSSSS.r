@@ -30,7 +30,7 @@ for (i in 1:nSites ) {
 summary(Initial$SIpine)
 
 
-siteInfo<- data.frame(siteID=c(1:nrow(Initial)),
+siteInfo<- data.frame(siteID=Initial$id,
                       climID=as.numeric(as.factor(Initial$meteo.id)),
                       siteType=rep(NA,nSites),
                       SWinit=rep(200,nSites),
@@ -131,15 +131,8 @@ sweden <- which(Initial$id %in% swedenX)
 
 ###select just 100 sites for test runs 
 if(testRun){
-#  siteX = siteX[1:100]
 # select 25 sites from each region
   siteX = c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
-  
-#  load("rdata/mineral_regions.rdata")
-#  siteX = c(got_m[1:25], svea_m[1:25], sn_m[1:25], nn_m[1:24])
-#  siteX <- c(siteX,14)
-  
-#  siteX = sweden[1:100]
 } 
 
 InitialX <- Initial[siteX,]
@@ -200,15 +193,7 @@ if(fromPlant){
                                              0.005*rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]] + 2.25)
 }
 
-# regions for plots
-got <- which(InitialX$id %in% gotX)
-svea <- which(InitialX$id %in% sveaX)
-sn <- which(InitialX$id %in% snX)
-nn <- which(InitialX$id %in% nnX)
-sweden <- which(InitialX$id %in% swedenX)
-
-
-save(got, svea, sn, nn, sweden, InitialX, file="rdata/runs/regs_SSSSrun.rdata")
+save(InitialX, file="rdata/runs/InitialX.rdata")
 #save(initPrebas,file = "rdata/initPrebas.rdata")
-#save(Initial, file="rdata/Initial.rdata")
+
 

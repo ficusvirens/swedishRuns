@@ -30,7 +30,7 @@ for (i in 1:nSites ) {
 summary(Initial$SIpine)
 
 
-siteInfo<- data.frame(siteID=c(1:nrow(Initial)),
+siteInfo<- data.frame(siteID=Initial$id,
                       climID=as.numeric(as.factor(Initial$meteo.id)),
                       siteType=rep(NA,nSites),
                       SWinit=rep(200,nSites),
