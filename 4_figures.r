@@ -1,12 +1,9 @@
-# THE FIGURES WON'T BE CORRECT IF MADE TO TEST RUN
-# DIVISION TO DIFFERENT REGIONS IS BASED ON SITE ORDER
 
 # --------- load data ------------
 #load(outFileSoilC)
 #load(outFile)
 #load(outFile1.5)
 #load(outFileMax)
-#load("rdata/Initial.rdata")
 load(litterdata)
 
 # ----- general data -----
@@ -17,20 +14,13 @@ rotLength_prun <- rotationLength(plot_run, simLength_prun)
 
 
 reg_output <- regionPTS(plot_area)
-plot_area_sites <- which(regionID(plot_area) %in% InitialX$id)
 
+load("rdata/runs/regs_SSSSrun.rdata")
 data_soilC <- InitialX$c.tot.tha/10
 
 #---- regions -------
-load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
-Initial<-cu
-InitialX <- Initial[siteX,]
-got <- which(got_id %in% InitialX$id)
-svea <- which(svea_id %in% InitialX$id)
-sn <- which(sn_id %in% InitialX$id)
-nn <- which(nn_id %in% InitialX$id)
-sweden <- which(mineral_id %in% InitialX$id)
 
+plot_area_sites <- regionNumbers(plot_area)
 
 
 # -------- colors ---------------
@@ -176,7 +166,7 @@ y13s <- ff_per_ha$X2013
 boxplot(ccMean[got], ccMean[svea], 
         ccMean[sn], ccMean[nn],
         ccMean[sweden],
-        main = c("Final Felling levels in Sweden (Prebas)",paste0(simName(plot_run))),
+        main = c("Final felling levels in Sweden (Prebas)",paste0(simName(plot_run))),
         ylab = "m3/ha", 
         names = regs_label)
 # add segments
@@ -209,7 +199,11 @@ fw_d <- (litter.origX[plot_area_sites,]$lit.root.tot+
            litter.origX[plot_area_sites,]$lit.branch.tot)/2 # fine woody
 cw_d <- (litter.origX[plot_area_sites,]$lit.stump.tot+
            litter.origX[plot_area_sites,]$lit.stem.tot)/2 # coarse woody
-gv_d <- rowSums(gv.biomlitX[plot_area_sites,2:17]) # ground vegetation
+gv_d <- (gv.biomlitX[plot_area_sites,]$gvb.abv.dwarfshrub+
+           gv.biomlitX[plot_area_sites,]$gvb.abv.herb+
+           gv.biomlitX[plot_area_sites,]$gvb.abv.grass+
+           gv.biomlitX[plot_area_sites,]$gvb.abv.moss+
+           gv.biomlitX[plot_area_sites,]$gvb.abv.lichen)/2 # ground vegetation
 
 
 boxplot(fol_d, fol_pts, rowSums(litter$fol[plot_area_sites,]), 

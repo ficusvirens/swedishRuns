@@ -280,6 +280,15 @@ regionID <- function(region) {
   else if(identical(region, "NN")) return(nn_id)
 }
 
+# returns the region site id's  
+regionNumbers <- function(region) {
+  if(identical(region, "Sweden")) return(sweden)
+  else if(identical(region, "GOT")) return(got)
+  else if(identical(region, "SVEA")) return(svea)
+  else if(identical(region, "SN")) return(sn)
+  else if(identical(region, "NN")) return(nn)
+}
+
 # counts the mean litterfall for each site through rotation time
 meanLitter <- function(output) {
   fol <- matrix(data=NA, nrow=nSites, ncol=3) # foliage

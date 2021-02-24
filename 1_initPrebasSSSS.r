@@ -200,7 +200,15 @@ if(fromPlant){
                                              0.005*rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]] + 2.25)
 }
 
+# regions for plots
+got <- which(InitialX$id %in% gotX)
+svea <- which(InitialX$id %in% sveaX)
+sn <- which(InitialX$id %in% snX)
+nn <- which(InitialX$id %in% nnX)
+sweden <- which(InitialX$id %in% swedenX)
 
+
+save(got, svea, sn, nn, sweden, InitialX, file="rdata/runs/regs_SSSSrun.rdata")
 #save(initPrebas,file = "rdata/initPrebas.rdata")
-#save(InitialX, file="rdata/InitialX.rdata")
+#save(Initial, file="rdata/Initial.rdata")
 

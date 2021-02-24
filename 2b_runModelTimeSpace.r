@@ -18,4 +18,7 @@ output_sn <- regionPrebas(initPrebas_sn, c(harvLimSN, 0))
 output_m <- regionPrebas(initPrebas_m, c(harvLimM,0))
 
 #save(output_got, output_svea, output_sn,
-#     output_nn, output_m, file="rdata/runs/tsRuns.rdata")
+#     output_nn, output_m, file=outFileTS)
+
+#save(output_got, output_svea, output_sn,
+ #    output_nn, output_m, file="rdata/runs/outputTSoldCWlitter.rdata")

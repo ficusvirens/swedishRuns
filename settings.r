@@ -13,8 +13,8 @@ library(abind)
 library(plyr)
 
 multiLayer = TRUE
-fromPlant = TRUE
-CSCrun = FALSE
+fromPlant = F
+CSCrun = F
 testRun = T  ###set to True if you want to make a test run
 simRuns = 150 ####years of simulations
 simRunsTS = 5 ### years of simulations for time/space run
@@ -47,10 +47,10 @@ outFileTS <- "rdata/runs/TSruns.rdata" # output file time/space runs
 outFileSoilC <- "rdata/runs/soilC.rdata" # output file with soilC results
 
 
-timeSpaceRuns <- "rdata/5run.rdata" # file with time/space output results
 litterdata <- "rdata/litterdata.rdata" # file with litter data
 
 sizeCwoodyLit <- c(10,10,5) #### size coarse woody litter for pine,spruce and birch 
+#sizeCwoodyLit <- c(30,30,10) #### size coarse woody litter for pine,spruce and birch 
 
 
 

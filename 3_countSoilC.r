@@ -36,7 +36,6 @@ soilCststMax <- (rowSums(soilCbyLayerMax$treeLitter)
 
 
 # count soil C for time/space runs
-load(timeSpaceRuns)
 
 prebas_got <- countSoilC(output_got, species)
 prebas_svea <- countSoilC(output_svea, species)
