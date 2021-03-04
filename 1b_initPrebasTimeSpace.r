@@ -146,14 +146,17 @@ nSites <- nrow(InitialX)
 siteInfoX<-siteInfo[siteX,]
 multiInitVarX<-multiInitVar[siteX,,]
 
-####use old model hc
+###use old model hc
 source("oldHcMod.r")
-inHc_p <- createInputsHc(multiInitVarX,1,1)
-inHc_sp <- createInputsHc(multiInitVarX,2,2)
-inHc_d <- createInputsHc(multiInitVarX,3,3)
-multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
-multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
-multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
+inHc_p <- createInputsHc(multiInitVar,1,1)
+inHc_sp <- createInputsHc(multiInitVar,2,2)
+inHc_d <- createInputsHc(multiInitVar,3,3)
+multiInitVar[,6,1] <- apply(inHc_p,1,HcModOld)
+multiInitVar[,6,2] <- apply(inHc_sp,1,HcModOld)
+multiInitVar[,6,3] <- apply(inHc_d,1,HcModOld)
+
+
+
 
 # run for simRunsTS years
 nYears<- rep(simRunsTS,nrow(siteInfo))
@@ -165,6 +168,9 @@ initPrebas_nn <- subSetInitPrebas(nn,defaultThin = def_thin,ClCut = cl_cut)
 
 initPrebas_m <- subSetInitPrebas(sweden,defaultThin = def_thin,ClCut = cl_cut)
 
+
+
+load("rdata/OldStuff/5run.rdata")
 
 #save(initPrebas_got, initPrebas_svea, initPrebas_sn,
 #  initPrebas_nn, initPrebas_m,file = "rdata/runs/initPrebas_ts.rdata")

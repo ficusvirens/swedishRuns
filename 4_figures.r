@@ -52,6 +52,40 @@ gv.biomlitX[is.na(gv.biomlitX)]=0
 litter.origX <- litter.orig[siteX,]
 litter.origX[is.na(litter.origX)]=0
 
+# ---------- soil C in different regions ----------
+
+boxplot(data_soilC[got], data_soilC[svea], 
+        data_soilC[sn], data_soilC[nn], data_soilC[sweden],
+        main = "Soil C in Sweden",
+        names = regs_label, 
+        ylab = "kg2/m2", 
+        ylim = c(0,20))
+
+# create data for segments
+# n = number of boxes
+n <- 5
+# width of each boxplot is 0.8
+x0s <- 1:n - 0.4
+x1s <- 1:n + 0.4
+# these are the y-coordinates for the horizontal lines
+# that you need to set to the desired values.
+Cline <- matrix(data=NA, nrow=5, ncol=2)
+
+Cline[1,] <- soilC_prebasST("GOT")
+Cline[2,] <- soilC_prebasST("SVEA")
+Cline[3,] <- soilC_prebasST("SN")
+Cline[4,] <- soilC_prebasST("NN")
+Cline[5,] <- soilC_prebasST("Sweden")
+
+# add segments
+segments(x0 = x0s, x1 = x1s, y0 = Cline[,1], col = "blue")
+segments(x0 = x0s, x1 = x1s, y0 = Cline[,2], col = "red")
+
+legend("topright", title = "Prebas space/time", 
+         fill = c("red", "blue"), 
+         legend = c("with gv","without gv"), 
+         horiz = F)
+
 
 # ---- soil C with different rotation lengths ---
 pst_line <- soilC_prebasST(plot_area)

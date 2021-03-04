@@ -15,7 +15,7 @@ library(plyr)
 multiLayer = TRUE
 fromPlant = F
 CSCrun = F
-testRun = T  ###set to True if you want to make a test run
+testRun = F  ###set to True if you want to make a test run
 simRuns = 150 ####years of simulations
 simRunsTS = 5 ### years of simulations for time/space run
 def_thin = 1 # default thin, 1 or 0 
