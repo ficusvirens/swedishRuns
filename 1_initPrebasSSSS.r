@@ -8,7 +8,7 @@ litterSize <- litterSizeDef
 litterSize[1,1:3] <- sizeCwoodyLit
 
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
-load('rdata/SWE.par.tair.vpd.precip.RData')
+#load('rdata/SWE.par.tair.vpd.precip.RData')
 # this loads the weather inputs
 
 load(weatherFile)
@@ -125,7 +125,7 @@ got <- which(Initial$id %in% gotX)
 svea <- which(Initial$id %in% sveaX)
 sn <- which(Initial$id %in% snX)
 nn <- which(Initial$id %in% nnX)
-sweden <- which(Initial$id %in% swedenX)
+siteX <- which(Initial$id %in% swedenX)
 
 
 
@@ -135,8 +135,8 @@ if(testRun){
   siteX = c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
 } 
 
-InitialX <- Initial[sweden,]
-run_sites <- sweden
+InitialX <- Initial[siteX,]
+run_sites <- siteX
 
 nSites <- nrow(Initial)
 siteInfoX<-siteInfo[siteX,]
@@ -154,27 +154,26 @@ multiInitVar[,6,3] <- apply(inHc_d,1,HcModOld)
 # run for simRuns years
 nYears<- rep(simRuns,nrow(siteInfo))
 
-###proc weather for test sites
-if(testRun){
-  climIDx <- sort(unique(siteInfoX[,2]))
-  siteInfoX[,2] <- match(siteInfoX[,2],climIDx)
-  PAR = PAR[climIDx,]
-  TAir= TAir[climIDx,]
-  VPD= VPD[climIDx,]
-  Precip= Precip[climIDx,]
-  CO2= CO2[climIDx,]
-  inHc_p <- createInputsHc(multiInitVarX,1,1)
-  inHc_sp <- createInputsHc(multiInitVarX,2,2)
-  inHc_d <- createInputsHc(multiInitVarX,3,3)
-  multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
-  multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
-  multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
-  nYears<- rep(simRuns,nrow(siteInfoX))
-  siteInfo <- siteInfoX
-  multiInitVar <- multiInitVarX
-} 
+# ###proc weather for test sites
+# if(testRun){
+#   climIDx <- sort(unique(siteInfoX[,2]))
+#   siteInfoX[,2] <- match(siteInfoX[,2],climIDx)
+#   PAR = PAR[climIDx,]
+#   TAir= TAir[climIDx,]
+#   VPD= VPD[climIDx,]
+#   Precip= Precip[climIDx,]
+#   CO2= CO2[climIDx,]
+#   inHc_p <- createInputsHc(multiInitVarX,1,1)
+#   inHc_sp <- createInputsHc(multiInitVarX,2,2)
+#   inHc_d <- createInputsHc(multiInitVarX,3,3)
+#   multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
+#   multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
+#   multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
+#   siteInfo <- siteInfoX
+#   multiInitVar <- multiInitVarX
+# } 
 
-initPrebas <- subSetInitPrebas(sweden,defaultThin = def_thin,ClCut = cl_cut)
+initPrebas <- subSetInitPrebas(siteX,defaultThin = def_thin,ClCut = cl_cut)
 
 
 
