@@ -1,9 +1,11 @@
 
 # --------- load data ------------
-#load(outFileSoilC)
-#load(outFile)
-#load(outFile1.5)
-#load(outFileMax)
+# load(outFileSoilC)
+# load(outFile)
+# load(outFile1.5)
+# load(outFileMax)
+# load(outFileTS)
+# load("rdata/runs/initPrebas.rdata")
 load(litterdata)
 
 # ----- general data -----
@@ -15,8 +17,8 @@ rotLength_prun <- rotationLength(plot_run, simLength_prun)
 
 reg_output <- regionPTS(plot_area)
 
-load("rdata/runs/InitialX.rdata")
-data_soilC <- InitialX$c.tot.tha/10
+load("rdata/runs/Initial.rdata")
+
 
 #---- regions -------
 load("rdata/region_ids.rdata")
@@ -27,37 +29,51 @@ sn <- which(plot_run$siteInfo[,1] %in% sn_id)
 nn <- which(plot_run$siteInfo[,1] %in% nn_id)
 sweden <- which(plot_run$siteInfo[,1] %in% mineral_id)
 
+InitialX <- Initial[plot_area_sites]
+data_soilC <- InitialX$c.tot.tha/10
+
 
 # -------- colors ---------------
+myCols2 <- c("grey", "maroon4")
 myCols3 <- c("orangered3", "royalblue4", "seagreen4")
 myCols5 = c("grey", "maroon4", "seagreen4", "darkorange3", "deepskyblue4")
 
 # -------- labels --------------
+regs_label_0 = c("Götaland", "Svealand", "Södra Norrland", 
+                 "Norra Norrland")
 regs_label = c("Götaland", "Svealand", "Södra Norrland", 
-             "Norra Norrland", "All Sweden")
+               "Norra Norrland", "All Sweden")
+regs_label_2 = c("Götaland","", "Svealand","", "Södra Norrland","", 
+                 "Norra Norrland","", "All Sweden","")
 rotLength_label = c("measurements", "normal rotation length", 
-         "1.5x rotation length", "max rotation length")
+                    "1.5x rotation length", "max rotation length")
 tupek_prebas_rot_label = c("Tupek","Prebas time/space", 
                            "Prebas whole rotation",
                            "Prebas rotation x1.5", 
                            "Prebas max rotation")
 litter_label_5empty = c("","", "tree foliage", "","","", "", "fine root", "", "",
-        "","", "fine woody", "", "","","", "coarse woody", "","", 
-        "","","ground vegetation", "","")
+                        "","", "fine woody", "", "","","", "coarse woody", "","", 
+                        "","","ground vegetation", "","")
 species_label = c("pine", "spruce", "deciduous")
 
 # --------- LITTERDATA --------------
-gv.biomlitX <- gv.biomlit[siteX,]
+gv.biomlitX <- gv.biomlit[plot_area_sites,]
 gv.biomlitX[is.na(gv.biomlitX)]=0
-litter.origX <- litter.orig[siteX,]
+litter.origX <- litter.orig[plot_area_sites,]
 litter.origX[is.na(litter.origX)]=0
+
+
 
 # ---------- soil C in different regions ----------
 
-boxplot(data_soilC[got], data_soilC[svea], 
-        data_soilC[sn], data_soilC[nn], data_soilC[sweden],
+boxplot(data_soilC[got], soilCstst[got], 
+        data_soilC[svea], soilCstst[svea],
+        data_soilC[sn], soilCstst[sn],
+        data_soilC[nn], soilCstst[nn],
+        data_soilC[sweden], soilCstst[sweden],
         main = "Soil C in Sweden",
-        names = regs_label, 
+        names = regs_label_2, 
+        col = myCols2,
         ylab = "kg2/m2", 
         ylim = c(0,20))
 
@@ -65,8 +81,8 @@ boxplot(data_soilC[got], data_soilC[svea],
 # n = number of boxes
 n <- 5
 # width of each boxplot is 0.8
-x0s <- 1:n - 0.4
-x1s <- 1:n + 0.4
+x0s <- (1:n)*2 - 1.4
+x1s <- (1:n)*2 - 0.6
 # these are the y-coordinates for the horizontal lines
 # that you need to set to the desired values.
 Cline <- matrix(data=NA, nrow=5, ncol=2)
@@ -81,10 +97,10 @@ Cline[5,] <- soilC_prebasST("Sweden")
 segments(x0 = x0s, x1 = x1s, y0 = Cline[,1], col = "blue")
 segments(x0 = x0s, x1 = x1s, y0 = Cline[,2], col = "red")
 
-legend("topright", title = "Prebas space/time", 
-         fill = c("red", "blue"), 
-         legend = c("with gv","without gv"), 
-         horiz = F)
+legend("topright", title = "Prebas", 
+       fill = c("red", "blue", "maroon4"), 
+       legend = c("time/space with gv","time/space without gv", "site specific"), 
+       horiz = F)
 
 
 # ---- soil C with different rotation lengths ---
@@ -230,7 +246,7 @@ fr_pts <- rowSums(reg_output$multiOut[,1,27,,1])
 fw_pts <- rowSums(reg_output$multiOut[,1,28,,1])
 cw_pts <- rowSums(reg_output$multiOut[,1,29,,1])  
 gv_pts <- reg_output$GVout[,1,2]
-  
+
 # litter from data
 fol_d <- litter.origX[plot_area_sites,]$lit.foliage.tot/2 # foliage
 fr_d <- litter.origX[plot_area_sites,]$lit.foliage.tot/2 # fine root
@@ -261,3 +277,76 @@ boxplot(fol_d, fol_pts, rowSums(litter$fol[plot_area_sites,]),
 legend("topright", fill = myCols5, 
        legend = tupek_prebas_rot_label, horiz = F)
 
+
+# --------- litter / soil C
+
+use <- which(initPrebas$siteInfo[,1] %in% Initial$id)
+
+
+litter <- meanLitter(output)
+
+litter_all <- rowSums(litter$fol)+rowSums(litter$fr)+rowSums(litter$cw)+
+  rowSums(litter$fw)+litter$gv
+
+litter_tupek_all <- fol_d+fr_d+fw_d+cw_d+gv_d
+
+# Prebas soil C
+plot(litter_all, soilCstst,
+     xlab = "Prebas litterfall kg C/ha",
+     ylab = "Prebas soil C kg/m2", 
+     main = "Soil C / litter")
+
+# data soil C
+plot(litter_all, Initial[use]$c.tot.tha/10,
+     xlab = "Prebas litterfall kg C/ha",
+     ylab = "Measured soil C kg/m2", 
+     main = "Soil C / litter")
+
+
+plot(litter_tupek_all, litter_all,
+     main="Litter", 
+     ylab="Prebas", 
+     xlab="Tupek")
+
+#----- soil C / ETS
+
+plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], soilCstst,
+     ylab="Prebas soil C kg/m2",
+     xlab="ETS",
+     main="Soil C / ETS")
+
+
+plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], Initial[use]$c.tot.tha/10,
+     ylab="Measured soil C kg/m2",
+     xlab="ETS",
+     main="Soil C / ETS")
+
+
+
+
+#---- soil types in different regions --- 
+
+got_in <- which(Initial$id %in% got_id)
+svea_in <- which(Initial$id %in% svea_id)
+sn_in <- which(Initial$id %in% sn_id)
+nn_in <- which(Initial$id %in% nn_id)
+
+
+boxplot(Initial[got_in,]$clay, Initial[svea_in,]$clay, 
+        Initial[sn_in,]$clay, Initial[nn_in,]$clay)
+
+boxplot(Initial[got_in,]$silt, Initial[svea_in,]$silt, 
+        Initial[sn_in,]$silt, Initial[nn_in,]$silt)
+
+boxplot(Initial[got_in,]$sand, Initial[svea_in,]$sand, 
+        Initial[sn_in,]$sand, Initial[nn_in,]$sand, 
+        main = "Sand",
+        names = regs_label_0)
+
+boxplot(Initial[got_in,]$texture, Initial[svea_in,]$texture, 
+        Initial[sn_in,]$texture, Initial[nn_in,]$texture, 
+        main = "Soil texture",
+        names = regs_label_0)
+
+boxplot(Initial[got_in,]$sortmater, Initial[svea_in,]$sortmater, 
+        Initial[sn_in,]$sortmater, Initial[nn_in,]$sortmater)

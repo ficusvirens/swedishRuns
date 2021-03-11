@@ -143,8 +143,6 @@ sweden <- which(Initial$id %in% swedenX)
 InitialX <- Initial[siteX,]
 
 nSites <- nrow(InitialX)
-siteInfoX<-siteInfo[siteX,]
-multiInitVarX<-multiInitVar[siteX,,]
 
 ###use old model hc
 source("oldHcMod.r")

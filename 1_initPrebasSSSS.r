@@ -131,24 +131,28 @@ sweden <- which(Initial$id %in% swedenX)
 
 ###select just 100 sites for test runs 
 if(testRun){
-# select 25 sites from each region
+  # select 25 sites from each region
   siteX = c(got[1:25], svea[1:25], sn[1:25], nn[1:25])
 } 
 
-InitialX <- Initial[siteX,]
+InitialX <- Initial[sweden,]
+run_sites <- sweden
 
-nSites <- nrow(InitialX)
+nSites <- nrow(Initial)
 siteInfoX<-siteInfo[siteX,]
 multiInitVarX<-multiInitVar[siteX,,]
 
 ####use old model hc
 source("oldHcMod.r")
-inHc_p <- createInputsHc(multiInitVarX,1,1)
-inHc_sp <- createInputsHc(multiInitVarX,2,2)
-inHc_d <- createInputsHc(multiInitVarX,3,3)
-multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
-multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
-multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
+inHc_p <- createInputsHc(multiInitVar,1,1)
+inHc_sp <- createInputsHc(multiInitVar,2,2)
+inHc_d <- createInputsHc(multiInitVar,3,3)
+multiInitVar[,6,1] <- apply(inHc_p,1,HcModOld)
+multiInitVar[,6,2] <- apply(inHc_sp,1,HcModOld)
+multiInitVar[,6,3] <- apply(inHc_d,1,HcModOld)
+
+# run for simRuns years
+nYears<- rep(simRuns,nrow(siteInfo))
 
 ###proc weather for test sites
 if(testRun){
@@ -159,32 +163,41 @@ if(testRun){
   VPD= VPD[climIDx,]
   Precip= Precip[climIDx,]
   CO2= CO2[climIDx,]
+  inHc_p <- createInputsHc(multiInitVarX,1,1)
+  inHc_sp <- createInputsHc(multiInitVarX,2,2)
+  inHc_d <- createInputsHc(multiInitVarX,3,3)
+  multiInitVarX[,6,1] <- apply(inHc_p,1,HcModOld)
+  multiInitVarX[,6,2] <- apply(inHc_sp,1,HcModOld)
+  multiInitVarX[,6,3] <- apply(inHc_d,1,HcModOld)
+  nYears<- rep(simRuns,nrow(siteInfoX))
+  siteInfo <- siteInfoX
+  multiInitVar <- multiInitVarX
 } 
 
-# run for simRuns years
-nYears<- rep(simRuns,nrow(siteInfoX))
+initPrebas <- subSetInitPrebas(sweden,defaultThin = def_thin,ClCut = cl_cut)
 
 
-initPrebas <- InitMultiSite(nYearsMS = nYears,
-                            siteInfo=siteInfoX,
-                            # pCROBAS = pCrobas, #soil information haven't been considered
-                            litterSize = litterSize,
-                            # pAWEN = parsAWEN,
-                            defaultThin=def_thin,
-                            ClCut = cl_cut,
-                            multiInitVar = multiInitVarX,
-                            # multiInitVar = multiInitVar2,
-                            PAR = PAR,
-                            TAir= TAir,
-                            VPD= VPD,
-                            Precip= Precip,
-                            CO2= CO2
-                            #yassoRun = 0.
-                            # lukeRuns = 0
-                            # initCLcutRatio = initCLcutRatio
-                            # multiThin = multiThin,
-                            # multiNthin = multiNthin
-)
+
+# initPrebas <- InitMultiSite(nYearsMS = nYears,
+#                             siteInfo=siteInfo,
+#                             # pCROBAS = pCrobas, #soil information haven't been considered
+#                             litterSize = litterSize,
+#                             # pAWEN = parsAWEN,
+#                             defaultThin=def_thin,
+#                             ClCut = cl_cut,
+#                             multiInitVar = multiInitVar,
+#                             # multiInitVar = multiInitVar2,
+#                             PAR = PAR,
+#                             TAir= TAir,
+#                             VPD= VPD,
+#                             Precip= Precip,
+#                             CO2= CO2
+#                             #yassoRun = 0.
+#                             # lukeRuns = 0
+#                             # initCLcutRatio = initCLcutRatio
+#                             # multiThin = multiThin,
+#                             # multiNthin = multiNthin
+# )
 
 #####assign the age at the beginning of rotation
 if(fromPlant){
@@ -193,7 +206,8 @@ if(fromPlant){
                                              0.005*rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]] + 2.25)
 }
 
-save(InitialX, file="rdata/runs/InitialX.rdata")
-#save(initPrebas,file = "rdata/initPrebas.rdata")
+save(Initial, run_sites, file="rdata/runs/Initial.rdata")
+
+#save(initPrebas,file = "rdata/runs/initPrebas.rdata")
 
 
