@@ -289,6 +289,36 @@ regionNumbers <- function(region) {
   else if(identical(region, "NN")) return(nn)
 }
 
+
+
+# returns the order numbers for the sites for each region
+# for four different data sets
+regionGroups <- function(prun_ids, initial_ids, litter_ids, gv_ids) {
+  regs <- c("got", "svea", "sn", "nn", "sweden")
+  
+  d <- list()
+  reg_ids <- list(got_id, svea_id, sn_id, nn_id, mineral_id)    
+  for(i in 1:5) {
+    t1 <- which(prun_ids %in% reg_ids[[i]])
+    t2 <- which(initial_ids %in% reg_ids[[i]])
+    t3 <- which(litter_ids %in% reg_ids[[i]])
+    t4 <- which(gv_ids %in% reg_ids[[i]])
+    d[[i]] <- list(t1, t2, t3, t4)
+    names(d[[i]]) <- c("plot_run", "initial", "litter", "gv")
+  }
+  names(d) <- regs
+  return(d)    
+}
+
+# returns the order number of the region from the function above
+regionOrder <- function(region) {
+  if(identical(region, "Sweden")) return(5)
+  else if(identical(region, "GOT")) return(1)
+  else if(identical(region, "SVEA")) return(2)
+  else if(identical(region, "SN")) return(3)
+  else if(identical(region, "NN")) return(4)
+}
+
 # counts the mean litterfall for each site through rotation time
 meanLitter <- function(output) {
   fol <- matrix(data=NA, nrow=nSites, ncol=3) # foliage

@@ -1,11 +1,11 @@
 
 # --------- load data ------------
-# load(outFileSoilC)
-# load(outFile)
-# load(outFile1.5)
-# load(outFileMax)
-# load(outFileTS)
-# load("rdata/runs/initPrebas.rdata")
+load(outFileSoilC)
+load(outFile)
+load(outFile1.5)
+load(outFileMax)
+load(outFileTS)
+load("rdata/runs/initPrebas.rdata")
 load(litterdata)
 
 # ----- general data -----
@@ -18,20 +18,24 @@ rotLength_prun <- rotationLength(plot_run, simLength_prun)
 reg_output <- regionPTS(plot_area)
 
 load("rdata/runs/Initial.rdata")
-
+data_soilC <- Initial$c.tot.tha/10
 
 #---- regions -------
 load("rdata/region_ids.rdata")
+
 plot_area_sites <- which(plot_run$siteInfo[,1] %in% regionID(plot_area))
-got <- which(plot_run$siteInfo[,1] %in% got_id)
-svea <- which(plot_run$siteInfo[,1] %in% svea_id)
-sn <- which(plot_run$siteInfo[,1] %in% sn_id)
-nn <- which(plot_run$siteInfo[,1] %in% nn_id)
-sweden <- which(plot_run$siteInfo[,1] %in% mineral_id)
 
-InitialX <- Initial[plot_area_sites]
-data_soilC <- InitialX$c.tot.tha/10
 
+prun_ids <- plot_run$siteInfo[,1]
+initial_ids <- Initial$id
+litter_ids <- litter.orig$id
+gv_ids <- gv.biomlit$id
+
+# this means that the sites might not be exactly the same 
+# if some sites are missing from the runs, for example
+reg <- regionGroups(prun_ids, initial_ids, litter_ids, gv_ids)
+
+regNo <- regionOrder(plot_area)
 
 # -------- colors ---------------
 myCols2 <- c("grey", "maroon4")
@@ -57,20 +61,19 @@ litter_label_5empty = c("","", "tree foliage", "","","", "", "fine root", "", ""
 species_label = c("pine", "spruce", "deciduous")
 
 # --------- LITTERDATA --------------
-gv.biomlitX <- gv.biomlit[plot_area_sites,]
-gv.biomlitX[is.na(gv.biomlitX)]=0
-litter.origX <- litter.orig[plot_area_sites,]
-litter.origX[is.na(litter.origX)]=0
+
+gv.biomlit[is.na(gv.biomlit)]=0
+litter.orig[is.na(litter.orig)]=0
 
 
 
 # ---------- soil C in different regions ----------
 
-boxplot(data_soilC[got], soilCstst[got], 
-        data_soilC[svea], soilCstst[svea],
-        data_soilC[sn], soilCstst[sn],
-        data_soilC[nn], soilCstst[nn],
-        data_soilC[sweden], soilCstst[sweden],
+boxplot(data_soilC[reg$got$initial], soilCstst[reg$got$plot_run], 
+        data_soilC[reg$svea$initial], soilCstst[reg$svea$plot_run],
+        data_soilC[reg$sn$initial], soilCstst[reg$sn$plot_run],
+        data_soilC[reg$nn$initial], soilCstst[reg$nn$plot_run],
+        data_soilC[reg$sweden$initial], soilCstst[reg$sweden$plot_run],
         main = "Soil C in Sweden",
         names = regs_label_2, 
         col = myCols2,
@@ -106,8 +109,8 @@ legend("topright", title = "Prebas",
 # ---- soil C with different rotation lengths ---
 pst_line <- soilC_prebasST(plot_area)
 
-boxplot(data_soilC[plot_area_sites], soilCstst[plot_area_sites], 
-        soilCstst1.5[plot_area_sites], soilCststMax[plot_area_sites], 
+boxplot(data_soilC[reg[[regNo]][[2]]], soilCstst[reg[[regNo]][[1]]], 
+        soilCstst1.5[reg[[regNo]][[1]]], soilCststMax[reg[[regNo]][[1]]], 
         main = c("Soil C in ", paste0(regionName(plot_area))),
         names = rotLength_label, 
         ylab = "kg/m2", 
@@ -126,9 +129,9 @@ for(i in 1:nSites) {
   harvMean[i] <- sum(plot_run$multiOut[i,1:simLength_prun[i],37,,1])/rotLength_prun[i]
 }
 
-boxplot(harvMean[got], harvMean[svea], 
-        harvMean[sn],harvMean[nn],
-        harvMean[sweden],
+boxplot(harvMean[reg$got$plot_run], harvMean[reg$svea$plot_run], 
+        harvMean[reg$sn$plot_run],harvMean[reg$nn$plot_run],
+        harvMean[reg$sweden$plot_run],
         main = c("Harvest levels in Sweden (Prebas)",paste0(simName(plot_run))), 
         ylab = "m3/ha", 
         names = regs_label)
@@ -181,9 +184,9 @@ y03s <- thin_per_ha$X2003
 # 2013
 y13s <- thin_per_ha$X2013
 
-boxplot(thinMean[got], thinMean[svea], 
-        thinMean[sn], thinMean[nn],
-        thinMean[sweden],
+boxplot(thinMean[reg$got$plot_run], thinMean[reg$svea$plot_run], 
+        thinMean[reg$sn$plot_run], thinMean[reg$nn$plot_run],
+        thinMean[reg$sweden$plot_run],
         main = c("Thinning levels in Sweden (Prebas)",paste0(simName(plot_run))),
         ylab = "m3/ha", 
         names = regs_label)
@@ -218,9 +221,9 @@ y03s <- ff_per_ha$X2003
 # 2013
 y13s <- ff_per_ha$X2013
 
-boxplot(ccMean[got], ccMean[svea], 
-        ccMean[sn], ccMean[nn],
-        ccMean[sweden],
+boxplot(ccMean[reg$got$plot_run], ccMean[reg$svea$plot_run], 
+        ccMean[reg$sn$plot_run], ccMean[reg$nn$plot_run],
+        ccMean[reg$sweden$plot_run],
         main = c("Final felling levels in Sweden (Prebas)",paste0(simName(plot_run))),
         ylab = "m3/ha", 
         names = regs_label)
@@ -248,62 +251,105 @@ cw_pts <- rowSums(reg_output$multiOut[,1,29,,1])
 gv_pts <- reg_output$GVout[,1,2]
 
 # litter from data
-fol_d <- litter.origX[plot_area_sites,]$lit.foliage.tot/2 # foliage
-fr_d <- litter.origX[plot_area_sites,]$lit.foliage.tot/2 # fine root
-fw_d <- (litter.origX[plot_area_sites,]$lit.root.tot+
-           litter.origX[plot_area_sites,]$lit.branch.tot)/2 # fine woody
-cw_d <- (litter.origX[plot_area_sites,]$lit.stump.tot+
-           litter.origX[plot_area_sites,]$lit.stem.tot)/2 # coarse woody
-gv_d <- (gv.biomlitX[plot_area_sites,]$gvb.abv.dwarfshrub+
-           gv.biomlitX[plot_area_sites,]$gvb.abv.herb+
-           gv.biomlitX[plot_area_sites,]$gvb.abv.grass+
-           gv.biomlitX[plot_area_sites,]$gvb.abv.moss+
-           gv.biomlitX[plot_area_sites,]$gvb.abv.lichen)/2 # ground vegetation
+fol_d <- litter.orig[reg[[regNo]][[3]],]$lit.foliage.tot/2 # foliage
+fr_d <- litter.orig[reg[[regNo]][[3]],]$lit.foliage.tot/2 # fine root
+fw_d <- (litter.orig[reg[[regNo]][[3]],]$lit.root.tot+
+           litter.orig[reg[[regNo]][[3]],]$lit.branch.tot)/2 # fine woody
+cw_d <- (litter.orig[reg[[regNo]][[3]],]$lit.stump.tot+
+           litter.orig[reg[[regNo]][[3]],]$lit.stem.tot)/2 # coarse woody
+gv_d <- (gv.biomlit[reg[[regNo]][[4]],]$gvb.abv.dwarfshrub+
+           gv.biomlit[reg[[regNo]][[4]],]$gvb.abv.herb+
+           gv.biomlit[reg[[regNo]][[4]],]$gvb.abv.grass+
+           gv.biomlit[reg[[regNo]][[4]],]$gvb.abv.moss+
+           gv.biomlit[reg[[regNo]][[4]],]$gvb.abv.lichen)/2 # ground vegetation
 
 
-boxplot(fol_d, fol_pts, rowSums(litter$fol[plot_area_sites,]), 
-        rowSums(litter1.5$fol[plot_area_sites,]), rowSums(litterMax$fol[plot_area_sites,]),
-        fr_d, fr_pts, rowSums(litter$fr[plot_area_sites,]),
-        rowSums(litter1.5$fr[plot_area_sites,]), rowSums(litterMax$fr[plot_area_sites,]),
-        fw_d, fw_pts, rowSums(litter$fw[plot_area_sites,]),
-        rowSums(litter1.5$fw[plot_area_sites,]), rowSums(litterMax$fw[plot_area_sites,]),
-        cw_d, cw_pts, rowSums(litter$cw[plot_area_sites,]),
-        rowSums(litter1.5$cw[plot_area_sites,]), rowSums(litterMax$cw[plot_area_sites,]),
-        gv_d, gv_pts, litter$gv[plot_area_sites], 
-        litter1.5$gv[plot_area_sites], litterMax$gv[plot_area_sites], 
+boxplot(fol_d, fol_pts, rowSums(litter$fol[reg[[regNo]][[1]],]), 
+        rowSums(litter1.5$fol[reg[[regNo]][[1]],]), rowSums(litterMax$fol[reg[[regNo]][[1]],]),
+        fr_d, fr_pts, rowSums(litter$fr[reg[[regNo]][[1]],]),
+        rowSums(litter1.5$fr[reg[[regNo]][[1]],]), rowSums(litterMax$fr[reg[[regNo]][[1]],]),
+        fw_d, fw_pts, rowSums(litter$fw[reg[[regNo]][[1]],]),
+        rowSums(litter1.5$fw[reg[[regNo]][[1]],]), rowSums(litterMax$fw[reg[[regNo]][[1]],]),
+        cw_d, cw_pts, rowSums(litter$cw[reg[[regNo]][[1]],]),
+        rowSums(litter1.5$cw[reg[[regNo]][[1]],]), rowSums(litterMax$cw[reg[[regNo]][[1]],]),
+        gv_d, gv_pts, litter$gv[reg[[regNo]][[1]]], 
+        litter1.5$gv[reg[[regNo]][[1]]], litterMax$gv[reg[[regNo]][[1]]], 
         main = c("Litter ",paste0(regionName(plot_area))), 
         names = litter_label_5empty, ylim=c(0,2000), 
         ylab = "kg C / ha", col = myCols5)
+
 legend("topright", fill = myCols5, 
        legend = tupek_prebas_rot_label, horiz = F)
 
 
 # --------- litter / soil C
 
-use <- which(initPrebas$siteInfo[,1] %in% Initial$id)
+# this is litter from Prebas
+litter_prebas <- meanLitter(output)
 
+# sum it up
+litter_prebas_all <- rowSums(litter_prebas$fol)+rowSums(litter_prebas$fr)+
+  rowSums(litter_prebas$cw)+rowSums(litter_prebas$fw)+
+  litter_prebas$gv
 
-litter <- meanLitter(output)
+# litter from tupek: merge and sum
+litter_tupek <- fol_d+fr_d+fw_d+cw_d
 
-litter_all <- rowSums(litter$fol)+rowSums(litter$fr)+rowSums(litter$cw)+
-  rowSums(litter$fw)+litter$gv
+lit_tupek <- cbind(litter_tupek, litter.orig[reg[[regNo]][[3]],]$id)
+colnames(lit_tupek) <- c("litter_tupek", "id")
+lit_tupek_gv <- cbind(gv_d, gv.biomlit[reg[[regNo]][[3]],]$id)
+colnames(lit_tupek_gv) <- c("litter_tupek_gv", "id")
 
-litter_tupek_all <- fol_d+fr_d+fw_d+cw_d+gv_d
+lit_tupek_all <- merge(lit_tupek, lit_tupek_gv, by="id")
+
+lit_tupek_all$tupek_littersum <- lit_tupek_all$litter_tupek+lit_tupek_all$litter_tupek_gv
 
 # Prebas soil C
-plot(litter_all, soilCstst,
+plot(litter_prebas_all, soilCstst,
      xlab = "Prebas litterfall kg C/ha",
      ylab = "Prebas soil C kg/m2", 
      main = "Soil C / litter")
 
+# put together site ID, prebas litter and prebas soil C
+soil_data_prebas <- cbind(output$siteInfo[,1], litter_prebas_all, soilCstst) 
+colnames(soil_data_prebas) <- c("id", "litter_prebas", "soilCstst")
+
+# add soil C from data
+sdata <- merge(soil_data_prebas, Initial[,c(1,20)], by="id")
+
+# change the unit
+sdata$soilC_data<-sdata$c.tot.tha/10
+
+sdata2 <- merge(sdata, lit_tupek_all, by="id")
+
+# drop the useless stuff
+soil_data <- sdata2[,c(1:3,5,8)]
+
+colnames(soil_data) <- c("id", "litter_prebas", "soilC_prebas",
+                         "soilC_data", "litter_tupek")
+
 # data soil C
-plot(litter_all, Initial[use]$c.tot.tha/10,
+plot(soil_data$litter_prebas, soil_data$soilC_data,
      xlab = "Prebas litterfall kg C/ha",
-     ylab = "Measured soil C kg/m2", 
-     main = "Soil C / litter")
+     #     ylab = "Measured soil C kg/m2", 
+     ylab = "Soil C kg/m2",
+     main = "Litter / soil C", 
+     ylim=c(0,30))
+
+points(soil_data$litter_prebas, soil_data$soilC_prebas, col="red")
+legend("topright", fill = c("black", "red"), 
+       legend = c("Measured", "Prebas"))
 
 
-plot(litter_tupek_all, litter_all,
+# linear models
+model <- lm(soilC_data~litter_prebas, data=soil_data)
+summary(model)
+
+model2 <- lm(soilC_prebas~litter_prebas, data=soil_data)
+summary(model2)
+
+# plot litter
+plot(soil_data$litter_tupek, soil_data$litter_prebas,
      main="Litter", 
      ylab="Prebas", 
      xlab="Tupek")
@@ -316,13 +362,9 @@ plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], soilCstst,
      main="Soil C / ETS")
 
 
-plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], Initial[use]$c.tot.tha/10,
-     ylab="Measured soil C kg/m2",
-     xlab="ETS",
-     main="Soil C / ETS")
 
 
-
+# !!! FROM THIS ON CHECKING // DOCUMENTATION IS STILL UNDER PROGRESS !!!
 
 #---- soil types in different regions --- 
 
@@ -350,3 +392,58 @@ boxplot(Initial[got_in,]$texture, Initial[svea_in,]$texture,
 
 boxplot(Initial[got_in,]$sortmater, Initial[svea_in,]$sortmater, 
         Initial[sn_in,]$sortmater, Initial[nn_in,]$sortmater)
+
+
+#---- MAPS ----
+library(mapview)
+
+hist(Initial[nn_in]$tempsum)
+hist(Initial[sn_in]$tempsum)
+hist(Initial[svea_in]$tempsum)
+hist(Initial[got_in]$tempsum)
+
+# this is where the coordinates of the plots are
+load("rdata/coordPlots.rdata")
+
+# and this is where the regions are in shape files 
+load("rdata/sweden_landsdel.rdata")
+
+plots_sf <- st_as_sf(coordPlots, coords=c("long", "lat")) %>%
+  st_set_crs(4326)
+
+plots_sf$number <- c(1:nrow(plots_sf))
+
+mapview(sweden_landsdel) + mapview(plots_sf)
+
+
+set <- plots_sf[which(plots_sf$id %in% Initial$id),]
+
+set2 <- merge(set, Initial[,c(1,72,78:79)], by="id")
+
+mapview(set2, zcol="tempsum")
+
+
+set_p <- plots_sf[which(plots_sf$id %in% initPrebas$siteInfo[,1]),]
+
+ETS_p <- cbind(initPrebas$siteInfo[,1], rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]])
+
+colnames(ETS_p) <- c("id", "ETS")
+
+set_p2 <- merge(set, ETS_p, by="id")
+
+ETS_set <- merge(set2, ETS_p, by="id")
+
+mapview(set_p2, zcol="ETS")
+
+
+plot(ETS_set$tempsum, ETS_set$ETS, 
+     ylab = "ETS Prebas", 
+     xlab = "ETS data")
+
+
+# make this again!
+
+plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], Initial[use]$c.tot.tha/10,
+     ylab="Measured soil C kg/m2",
+     xlab="ETS",
+     main="Soil C / ETS")

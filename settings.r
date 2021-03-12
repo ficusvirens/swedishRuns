@@ -13,9 +13,9 @@ library(abind)
 library(plyr)
 
 multiLayer = TRUE
-fromPlant = F
+fromPlant = T
 CSCrun = F
-testRun = F  ###set to True if you want to make a test run
+testRun = T  ###set to True if you want to make a test run
 simRuns = 150 ####years of simulations
 simRunsTS = 5 ### years of simulations for time/space run
 def_thin = 1 # default thin, 1 or 0 
@@ -77,3 +77,4 @@ plotrun <- "normal" # set the simulation run to plot here: alternatives are
 # "max" = run with rotation time that is maximum between tapio rules
 #               clearcut timing and stand age, though no more than simulation time
 # some plots include all the runs; this setting does not alter them
+

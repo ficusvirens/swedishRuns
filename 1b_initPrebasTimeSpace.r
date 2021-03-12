@@ -8,7 +8,7 @@ litterSize <- litterSizeDef
 litterSize[1,1:3] <- sizeCwoodyLit
 
 load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
-load('rdata/SWE.par.tair.vpd.precip.RData')
+#load('rdata/SWE.par.tair.vpd.precip.RData')
 # this loads the weather inputs
 
 load(weatherFile)
