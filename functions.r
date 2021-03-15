@@ -321,10 +321,10 @@ regionOrder <- function(region) {
 
 # counts the mean litterfall for each site through rotation time
 meanLitter <- function(output) {
-  fol <- matrix(data=NA, nrow=nSites, ncol=3) # foliage
-  fr <- matrix(data=NA, nrow=nSites, ncol=3) # fine root
-  cw <- matrix(data=NA, nrow=nSites, ncol=3) # coarse woody
-  fw <- matrix(data=NA, nrow=nSites, ncol=3) # fine woody 
+  fol <- matrix(data=NA, nrow=output$nSites, ncol=3) # foliage
+  fr <- matrix(data=NA, nrow=output$nSites, ncol=3) # fine root
+  cw <- matrix(data=NA, nrow=output$nSites, ncol=3) # coarse woody
+  fw <- matrix(data=NA, nrow=output$nSites, ncol=3) # fine woody 
   gv <- vector() # ground veg
   
   simLength <- simulationLength(output)

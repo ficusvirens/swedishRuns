@@ -1,3 +1,5 @@
+library(ggplot2)
+
 
 # --------- load data ------------
 load(outFileSoilC)
@@ -54,6 +56,8 @@ tupek_prebas_rot_label = c("Tupek","Prebas time/space",
                            "Prebas whole rotation",
                            "Prebas rotation x1.5", 
                            "Prebas max rotation")
+litter_label = c("Tree foliage", "Fine root", "Fine woody", 
+                 "Coarse woody", "Ground vegetation")
 litter_label_5empty = c("","", "tree foliage", "","","", "", "fine root", "", "",
                         "","", "fine woody", "", "","","", "coarse woody", "","", 
                         "","","ground vegetation", "","")
@@ -97,8 +101,8 @@ for(i in 1:5) {
 }
 
 # add segments
-segments(x0 = x0s, x1 = x1s, y0 = Cline[,1], col = "blue")
-segments(x0 = x0s, x1 = x1s, y0 = Cline[,2], col = "red")
+segments(x0 = x0s, x1 = x1s, y0 = Cline[,1], col = "red")
+segments(x0 = x0s, x1 = x1s, y0 = Cline[,2], col = "blue")
 
 legend("topright", title = "Prebas", 
        fill = c("red", "blue", "maroon4"), 
@@ -281,6 +285,49 @@ boxplot(fol_d, fol_pts, rowSums(litter$fol[reg[[regNo]][[1]],]),
 legend("topright", fill = myCols5, 
        legend = tupek_prebas_rot_label, horiz = F)
 
+# ----- try to make the above better with ggplot2 ---
+
+# put all litter data in a list of lists
+megaLitter <- list("fol" = list("d" = fol_d, "ts" = fol_pts, 
+                            "normal" = rowSums(litter$fol[reg[[regNo]][[1]],]), 
+                            "1.5" = rowSums(litter1.5$fol[reg[[regNo]][[1]],]), 
+                            "max" = rowSums(litterMax$fol[reg[[regNo]][[1]],])),
+                    "fr" = list("d" = fr_d, "ts" = fr_pts, 
+                            "normal" = rowSums(litter$fr[reg[[regNo]][[1]],]),
+                            "1.5" = rowSums(litter1.5$fr[reg[[regNo]][[1]],]), 
+                            "max" = rowSums(litterMax$fr[reg[[regNo]][[1]],])),
+                    "fw" = list("d" = fw_d, "ts" = fw_pts, 
+                            "normal" = rowSums(litter$fw[reg[[regNo]][[1]],]),
+                            "1.5" = rowSums(litter1.5$fw[reg[[regNo]][[1]],]), 
+                            "max" = rowSums(litterMax$fw[reg[[regNo]][[1]],])),
+                    "cw" = list("d" = cw_d, "ts" = cw_pts, 
+                            "normal" = rowSums(litter$cw[reg[[regNo]][[1]],]),
+                            "1.5" = rowSums(litter1.5$cw[reg[[regNo]][[1]],]), 
+                            "max" = rowSums(litterMax$cw[reg[[regNo]][[1]],])),
+                    "gv" = list("d" = gv_d, "ts"= gv_pts, 
+                            "normal" = litter$gv[reg[[regNo]][[1]]], 
+                            "1.5" = litter1.5$gv[reg[[regNo]][[1]]], 
+                            "max" = litterMax$gv[reg[[regNo]][[1]]]))
+
+# melt it to make a boxplot
+megaLitterMelt <- melt(megaLitter)
+colnames(megaLitterMelt) <- c("value", "source", "variable")
+
+# factorize to make the order in the plot right
+megaLitterMelt$source <- factor(megaLitterMelt$source, levels = c("d", "ts", "normal", "1.5", "max"))
+megaLitterMelt$variable <- factor(megaLitterMelt$variable, levels = c("fol", "fr", "fw", "cw", "gv"))
+
+
+ggplot(megaLitterMelt, aes(x=variable, y=value, fill=source)) + 
+  ylim(0, 2000) +  
+  geom_boxplot() +
+  labs(title = c("Litter ",paste0(regionName(plot_area))), fill = "",
+       x="", y = "kg C / ha") +
+  theme(plot.title = element_text(hjust = 0.5)) + # title in the center
+  scale_fill_discrete(labels=tupek_prebas_rot_label) + # legend labels
+  scale_x_discrete(labels=litter_label) # x axis labels
+
+  
 
 # --------- litter / soil C
 
@@ -403,7 +450,6 @@ boxplot(Initial[reg$got$initial,]$sortmater, Initial[reg$svea$initial,]$sortmate
         main = "Sortmater", 
         names = regs_label_0)
 
-# !!! FROM THIS ON CHECKING // DOCUMENTATION IS STILL UNDER PROGRESS !!!
 #---- MAPS ----
 library(mapview)
 
