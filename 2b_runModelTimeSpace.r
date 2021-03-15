@@ -1,7 +1,7 @@
 library(Rprebasso)
-#load("rdata/runs/initPrebasTS.rdata")
+#load(InitPrebasTSFile)
 
-harvestData <- read.csv("input/harvestData.csv")
+harvestData <- read.csv(hdataFile)
 
 harvLimSvea <- initPrebas_svea$nSites*harvestData[1,1]/harvestData[1,2]*1000*harvLvl
 harvLimGot <- initPrebas_got$nSites*harvestData[2,1]/harvestData[2,2]*1000*harvLvl
@@ -20,5 +20,3 @@ output_m <- regionPrebas(initPrebas_m, c(harvLimM,0))
 #save(output_got, output_svea, output_sn,
 #     output_nn, output_m, file=outFileTS)
 
-#save(output_got, output_svea, output_sn,
- #    output_nn, output_m, file="rdata/runs/outputTSoldCWlitter.rdata")

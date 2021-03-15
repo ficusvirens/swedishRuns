@@ -37,6 +37,11 @@ library(Rprebasso)
 
 weatherFile <- "rdata/weather150.rdata" ###weather input file
 
+# file with site data
+cuFile <- "rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData"
+
+fiFile <- "input/up1380xredigerad.csv"
+
 # load the regions of Sweden
 load("rdata/region_ids.rdata")
 
@@ -44,10 +49,19 @@ outFile <- "rdata/runs/output.rdata" # output file normal run
 outFile1.5 <- "rdata/runs/output1_5.rdata" # output file 1.5 x run 
 outFileMax <- "rdata/runs/outputMax.rdata" # output file max run
 outFileTS <- "rdata/runs/TSruns.rdata" # output file time/space runs
-outFileSoilC <- "rdata/runs/soilC.rdata" # output file with soilC results
+outFileSoilC <- "rdata/runs/soilC.rdata" # output file with soilC results for long runs
+outFileSoilCTS <- "rdata/runs/soilCTS.rdata" # output file with soilC results for time/space runs
 
+
+InitPrebasFile <- "rdata/runs/InitPrebas.rdata" # initPrebas for normal run
+InitPrebasTSFile <- "rdata/runs/initPrebas_ts.rdata" # initPrebas for time/space runs
+InitialFile <- "rdata/runs/Initial.rdata" # measurement data
 
 litterdata <- "rdata/litterdata.rdata" # file with litter data
+hdataFile <- "input/harvestData.csv" # harvest data file
+
+coordinateFile <- "rdata/coordPlots.rdata" # coordinates of the plots
+swedenLandsdelFile <- "rdata/sweden_landsdel.rdata" # map data of the sweden regions
 
 sizeCwoodyLit <- c(10,10,5) #### size coarse woody litter for pine,spruce and birch 
 #sizeCwoodyLit <- c(30,30,10) #### size coarse woody litter for pine,spruce and birch 

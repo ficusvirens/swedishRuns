@@ -7,15 +7,14 @@ source("settings.r")
 litterSize <- litterSizeDef
 litterSize[1,1:3] <- sizeCwoodyLit
 
-load('rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData')
-#load('rdata/SWE.par.tair.vpd.precip.RData')
-# this loads the weather inputs
+load(cuFile)
 
+# this loads the weather inputs
 load(weatherFile)
 
 ####################SiteInfo start##########################
 cu$Year<-as.numeric(substr(cu$id,1,4))
-FI<-read.csv('input/up1380xredigerad.csv')
+FI<-read.csv(fiFile)
 FI$ID<-as.numeric(paste(FI$taxar,FI$traktnr,FI$palslagnr,FI$delytanr,sep = ''))
 
 
@@ -168,9 +167,7 @@ initPrebas_m <- subSetInitPrebas(sweden,defaultThin = def_thin,ClCut = cl_cut)
 
 
 
-load("rdata/OldStuff/5run.rdata")
-
 #save(initPrebas_got, initPrebas_svea, initPrebas_sn,
-#  initPrebas_nn, initPrebas_m,file = "rdata/runs/initPrebas_ts.rdata")
+#  initPrebas_nn, initPrebas_m,file = InitPrebasTSFile)
 
 

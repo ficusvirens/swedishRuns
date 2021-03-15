@@ -58,6 +58,7 @@ c_m0 <- sum(prebas_m$treeLitter)/10000
 
 #save(soilCstst, soilCstst1.5, soilCststMax,
 #     simLength, rotLength, simLength1.5, rotLength1.5,
-#     simLengthMax, rotLengthMax,
-#     c_got, c_svea, c_sn, c_nn, c_m, 
-#     c_got0, c_svea0, c_sn0, c_nn0, c_m0, file=outFileSoilC)
+#     simLengthMax, rotLengthMax, file=outFileSoilC)
+
+# save(c_got, c_svea, c_sn, c_nn, c_m, 
+#     c_got0, c_svea0, c_sn0, c_nn0, c_m0, file=outFileSoilCTS)

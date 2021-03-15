@@ -1,11 +1,12 @@
 
 # --------- load data ------------
 load(outFileSoilC)
+load(outFileSoilCTS)
 load(outFile)
 load(outFile1.5)
 load(outFileMax)
 load(outFileTS)
-load("rdata/runs/initPrebas.rdata")
+load(InitPrebasFile)
 load(litterdata)
 
 # ----- general data -----
@@ -17,24 +18,22 @@ rotLength_prun <- rotationLength(plot_run, simLength_prun)
 
 reg_output <- regionPTS(plot_area)
 
-load("rdata/runs/Initial.rdata")
+load(InitialFile)
 data_soilC <- Initial$c.tot.tha/10
 
 #---- regions -------
-load("rdata/region_ids.rdata")
-
+# these are the sites (order number) that are used in the 150 years simulation
 plot_area_sites <- which(plot_run$siteInfo[,1] %in% regionID(plot_area))
 
-
+# site ID's of 150 years run
 prun_ids <- plot_run$siteInfo[,1]
-initial_ids <- Initial$id
-litter_ids <- litter.orig$id
-gv_ids <- gv.biomlit$id
 
 # this means that the sites might not be exactly the same 
 # if some sites are missing from the runs, for example
-reg <- regionGroups(prun_ids, initial_ids, litter_ids, gv_ids)
+reg <- regionGroups(prun_ids, Initial$id, litter.orig$id, gv.biomlit$id)
 
+# reg[[regNo]] is a list of lists of the site order numbers for each different 
+# data set (1: 150 years simulation, 2: Initial, 3: litter.orig, 4: gv.biomlit)
 regNo <- regionOrder(plot_area)
 
 # -------- colors ---------------
@@ -62,9 +61,10 @@ species_label = c("pine", "spruce", "deciduous")
 
 # --------- LITTERDATA --------------
 
+# tupek litter data for ground vegetation and other litter
+# set NA's to 0
 gv.biomlit[is.na(gv.biomlit)]=0
 litter.orig[is.na(litter.orig)]=0
-
 
 
 # ---------- soil C in different regions ----------
@@ -90,11 +90,11 @@ x1s <- (1:n)*2 - 0.6
 # that you need to set to the desired values.
 Cline <- matrix(data=NA, nrow=5, ncol=2)
 
-Cline[1,] <- soilC_prebasST("GOT")
-Cline[2,] <- soilC_prebasST("SVEA")
-Cline[3,] <- soilC_prebasST("SN")
-Cline[4,] <- soilC_prebasST("NN")
-Cline[5,] <- soilC_prebasST("Sweden")
+clines <- c("GOT", "SVEA", "SN", "NN", "Sweden")
+
+for(i in 1:5) {
+  Cline[i,] <- soilC_prebasST(clines[i])
+}
 
 # add segments
 segments(x0 = x0s, x1 = x1s, y0 = Cline[,1], col = "blue")
@@ -358,92 +358,86 @@ plot(soil_data$litter_tupek, soil_data$litter_prebas,
 
 plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], soilCstst,
      ylab="Prebas soil C kg/m2",
-     xlab="ETS",
+     xlab="ETS (Prebas)",
      main="Soil C / ETS")
 
 
+ETS_p <- cbind(initPrebas$siteInfo[,1], rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]])
+temp <- merge(ETS_p, Initial[,c(1,20)], by="id")
+
+plot(temp$ETS, temp$c.tot.tha/10,
+     ylab="Measured soil C kg/m2",
+     xlab="ETS (Prebas)",
+     main="Soil C / ETS")
+
+plot(Initial$tempsum, Initial$c.tot.tha/10,
+     ylab="Measured soil C kg/m2",
+     xlab="ETS (data)",
+     main="Soil C / ETS")
+
+#---- soil types in different regions, DATA --- 
 
 
-# !!! FROM THIS ON CHECKING // DOCUMENTATION IS STILL UNDER PROGRESS !!!
+boxplot(Initial[reg$got$initial,]$clay, Initial[reg$svea$initial,]$clay, 
+        Initial[reg$sn$initial,]$clay, Initial[reg$nn$initial,]$clay, 
+        main = "Clay", 
+        names = regs_label_0)
 
-#---- soil types in different regions --- 
+boxplot(Initial[reg$got$initial,]$silt, Initial[reg$svea$initial,]$silt, 
+        Initial[reg$sn$initial,]$silt, Initial[reg$nn$initial,]$silt, 
+        main = "Silt", 
+        names = regs_label_0)
 
-got_in <- which(Initial$id %in% got_id)
-svea_in <- which(Initial$id %in% svea_id)
-sn_in <- which(Initial$id %in% sn_id)
-nn_in <- which(Initial$id %in% nn_id)
-
-
-boxplot(Initial[got_in,]$clay, Initial[svea_in,]$clay, 
-        Initial[sn_in,]$clay, Initial[nn_in,]$clay)
-
-boxplot(Initial[got_in,]$silt, Initial[svea_in,]$silt, 
-        Initial[sn_in,]$silt, Initial[nn_in,]$silt)
-
-boxplot(Initial[got_in,]$sand, Initial[svea_in,]$sand, 
-        Initial[sn_in,]$sand, Initial[nn_in,]$sand, 
+boxplot(Initial[reg$got$initial,]$sand, Initial[reg$svea$initial,]$sand, 
+        Initial[reg$sn$initial,]$sand, Initial[reg$nn$initial,]$sand, 
         main = "Sand",
         names = regs_label_0)
 
-boxplot(Initial[got_in,]$texture, Initial[svea_in,]$texture, 
-        Initial[sn_in,]$texture, Initial[nn_in,]$texture, 
+boxplot(Initial[reg$got$initial,]$texture, Initial[reg$svea$initial,]$texture, 
+        Initial[reg$sn$initial,]$texture, Initial[reg$nn$initial,]$texture, 
         main = "Soil texture",
         names = regs_label_0)
 
-boxplot(Initial[got_in,]$sortmater, Initial[svea_in,]$sortmater, 
-        Initial[sn_in,]$sortmater, Initial[nn_in,]$sortmater)
+boxplot(Initial[reg$got$initial,]$sortmater, Initial[reg$svea$initial,]$sortmater, 
+        Initial[reg$sn$initial,]$sortmater, Initial[reg$nn$initial,]$sortmater,
+        main = "Sortmater", 
+        names = regs_label_0)
 
-
+# !!! FROM THIS ON CHECKING // DOCUMENTATION IS STILL UNDER PROGRESS !!!
 #---- MAPS ----
 library(mapview)
 
-hist(Initial[nn_in]$tempsum)
-hist(Initial[sn_in]$tempsum)
-hist(Initial[svea_in]$tempsum)
-hist(Initial[got_in]$tempsum)
-
 # this is where the coordinates of the plots are
-load("rdata/coordPlots.rdata")
+load(coordinateFile)
 
 # and this is where the regions are in shape files 
-load("rdata/sweden_landsdel.rdata")
+load(swedenLandsdelFile)
 
+# change the coordinate system
 plots_sf <- st_as_sf(coordPlots, coords=c("long", "lat")) %>%
   st_set_crs(4326)
 
-plots_sf$number <- c(1:nrow(plots_sf))
-
-mapview(sweden_landsdel) + mapview(plots_sf)
-
-
+# put tempsum and the coordinates together
 set <- plots_sf[which(plots_sf$id %in% Initial$id),]
-
 set2 <- merge(set, Initial[,c(1,72,78:79)], by="id")
 
+# tempsum in the map
 mapview(set2, zcol="tempsum")
 
-
+# put ETS (by Prebas) and coordinates together
 set_p <- plots_sf[which(plots_sf$id %in% initPrebas$siteInfo[,1]),]
-
 ETS_p <- cbind(initPrebas$siteInfo[,1], rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]])
 
 colnames(ETS_p) <- c("id", "ETS")
-
 set_p2 <- merge(set, ETS_p, by="id")
-
 ETS_set <- merge(set2, ETS_p, by="id")
 
+# ETS (by Prebas) in the map
 mapview(set_p2, zcol="ETS")
 
-
+# ETS Prebas and tempsum
 plot(ETS_set$tempsum, ETS_set$ETS, 
      ylab = "ETS Prebas", 
      xlab = "ETS data")
 
 
-# make this again!
-
-plot(rowMeans(initPrebas$ETSy)[initPrebas$siteInfo[,2]], Initial[use]$c.tot.tha/10,
-     ylab="Measured soil C kg/m2",
-     xlab="ETS",
-     main="Soil C / ETS")

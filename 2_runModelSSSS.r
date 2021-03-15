@@ -1,4 +1,4 @@
-#load("rdata/initPrebas.rdata")
+#load(InitPrebasFile)
 
 # run model
 #if(CSCrun) {
