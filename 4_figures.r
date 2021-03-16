@@ -323,7 +323,10 @@ ggplot(megaLitterMelt, aes(x=variable, y=value, fill=source)) +
   geom_boxplot() +
   labs(title = c("Litter ",paste0(regionName(plot_area))), fill = "",
        x="", y = "kg C / ha") +
-  theme(plot.title = element_text(hjust = 0.5)) + # title in the center
+  theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
+        axis.text = element_text(size=14), # axis text size
+        axis.title = element_text(size=16), # axis title size
+        legend.text = element_text(size=12)) + # legend text size
   scale_fill_discrete(labels=tupek_prebas_rot_label) + # legend labels
   scale_x_discrete(labels=litter_label) # x axis labels
 
