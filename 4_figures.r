@@ -320,7 +320,7 @@ megaLitterMelt$variable <- factor(megaLitterMelt$variable, levels = c("fol", "fr
 
 ggplot(megaLitterMelt, aes(x=variable, y=value, fill=source)) + 
   ylim(0, 2000) +  
-  geom_boxplot() +
+  geom_boxplot() + 
   labs(title = c("Litter ",paste0(regionName(plot_area))), fill = "",
        x="", y = "kg C / ha") +
   theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
@@ -484,9 +484,48 @@ ETS_set <- merge(set2, ETS_p, by="id")
 # ETS (by Prebas) in the map
 mapview(set_p2, zcol="ETS")
 
+#----------- ETS -------------
+
 # ETS Prebas and tempsum
 plot(ETS_set$tempsum, ETS_set$ETS, 
      ylab = "ETS Prebas", 
      xlab = "ETS data")
 
+# ETS from time/space analysis
+ETS_got <- rowMeans(output_got$multiOut[,,5,1,1])
+ETS_svea <- rowMeans(output_svea$multiOut[,,5,1,1])
+ETS_sn <- rowMeans(output_sn$multiOut[,,5,1,1])
+ETS_nn <- rowMeans(output_nn$multiOut[,,5,1,1])
+
+# ETS from data, same sites
+ETS_got_d <- Initial[which(Initial$id %in% output_got$siteInfo[,1]),]$tempsum
+ETS_svea_d <- Initial[which(Initial$id %in% output_svea$siteInfo[,1]),]$tempsum
+ETS_sn_d <- Initial[which(Initial$id %in% output_sn$siteInfo[,1]),]$tempsum
+ETS_nn_d <- Initial[which(Initial$id %in% output_nn$siteInfo[,1]),]$tempsum
+
+
+megaETS <- list("got" = cbind("prebas" = ETS_got, "data" = ETS_got_d), 
+                "svea" = cbind("prebas" = ETS_svea, "data" = ETS_svea_d),
+                "sn" = cbind("prebas" = ETS_sn, "data" = ETS_sn_d),
+                "nn" = cbind("prebas" = ETS_nn, "data" = ETS_nn_d))
+
+megaETS_melt <- melt(megaETS)
+
+colnames(megaETS_melt) <- c("var1", "source", "value", "region")
+
+# factorizing to get the regions in right order
+megaETS_melt$region <- factor(megaETS_melt$region, 
+                              levels = c("got", "svea", "sn", "nn"))
+
+
+ggplot(megaETS_melt, aes(x=region, y=value, fill=source)) + 
+  geom_boxplot() +
+    labs(title = "ETS", fill = "", # titles
+       x="", y = "Degree days") +
+  theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
+        axis.text = element_text(size=14), # axis text size
+        axis.title = element_text(size=16), # axis title size
+        legend.text = element_text(size=12)) + # legend text size
+  scale_fill_discrete(labels=c("Prebas", "Measurements")) + # legend labels
+  scale_x_discrete(labels=regs_label_0) # x axis labels
 

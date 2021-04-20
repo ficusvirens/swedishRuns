@@ -13,10 +13,10 @@ library(abind)
 library(plyr)
 
 multiLayer = TRUE
-fromPlant = T
+fromPlant = F
 CSCrun = F
-testRun = T  ###set to True if you want to make a test run
-simRuns = 150 ####years of simulations
+testRun = F  ###set to True if you want to make a test run
+simRuns = 15 ####years of simulations site specific
 simRunsTS = 5 ### years of simulations for time/space run
 def_thin = 1 # default thin, 1 or 0 
 cl_cut = 1 # clearcut, 1 or 0

@@ -30,7 +30,7 @@ summary(Initial$SIpine)
 
 
 siteInfo<- data.frame(siteID=Initial$id,
-                      climID=as.numeric(as.factor(Initial$meteo.id)),
+#                      climID=as.numeric(as.factor(Initial$meteo.id)),
                       siteType=rep(NA,nSites),
                       SWinit=rep(200,nSites),
                       CWinit=rep(0,nSites),
@@ -42,6 +42,14 @@ siteInfo<- data.frame(siteID=Initial$id,
                       FC=rep(0.450,nSites),
                       WP=rep(0.118,nSites)
 )
+
+# ## ---  with clipick weather!
+load("rdata/climID.rdata")
+colnames(climID) <- c("siteID", "climID")
+siteInfo <- merge(climID, siteInfo, by="siteID", all.y=T)
+###---    clipick weather stuff ends
+
+
 siteInfo$siteType[which(Initial$SIpine>=26)]<-2
 siteInfo$siteType[which(Initial$SIpine<26&Initial$SIpine>=20)]<-3
 siteInfo$siteType[which(Initial$SIpine<20&Initial$SIpine>=14)]<-4
