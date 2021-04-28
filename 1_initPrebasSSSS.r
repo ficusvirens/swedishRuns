@@ -19,7 +19,7 @@ FI$ID<-as.numeric(paste(FI$taxar,FI$traktnr,FI$palslagnr,FI$delytanr,sep = ''))
 
 
 Initial<-cu
-nSites<-nrow(cu)
+nSites<-nrow(Initial)
 
 Initial$SIpine<-NA
 for (i in 1:nSites ) {
@@ -29,26 +29,37 @@ for (i in 1:nSites ) {
 summary(Initial$SIpine)
 
 
-siteInfo<- data.frame(siteID=Initial$id,
-#                      climID=as.numeric(as.factor(Initial$meteo.id)), # this out with clipick weather!
-                      siteType=rep(NA,nSites),
-                      SWinit=rep(200,nSites),
-                      CWinit=rep(0,nSites),
-                      SOGinit=rep(0,nSites),
-                      Sinit =rep(0,nSites),
-                      nLayers =rep(1,nSites),
-                      nSpecies=rep(1,nSites),
-                      Dsoil=rep(413,nSites),
-                      FC=rep(0.450,nSites),
-                      WP=rep(0.118,nSites)
-)
+if (cuWeather) {
+  siteInfo<- data.frame(siteID=Initial$id,
+                        climID=as.numeric(as.factor(Initial$meteo.id)), 
+                        siteType=rep(NA,nSites),
+                        SWinit=rep(200,nSites),
+                        CWinit=rep(0,nSites),
+                        SOGinit=rep(0,nSites),
+                        Sinit =rep(0,nSites),
+                        nLayers =rep(1,nSites),
+                        nSpecies=rep(1,nSites),
+                        Dsoil=rep(413,nSites),
+                        FC=rep(0.450,nSites),
+                        WP=rep(0.118,nSites)
+  )
+}
 
-# ## ---  with clipick weather!
-load("rdata/climID.rdata")
-colnames(climID) <- c("siteID", "climID")
-siteInfo <- merge(climID, siteInfo, by="siteID", all.y=T)
-###---    clipick weather stuff ends
 
+if (!cuWeather) {
+  siteInfo<- data.frame(siteID=Initial$id,
+                        siteType=rep(NA,nSites),
+                        SWinit=rep(200,nSites),
+                        CWinit=rep(0,nSites),
+                        SOGinit=rep(0,nSites),
+                        Sinit =rep(0,nSites),
+                        nLayers =rep(1,nSites),
+                        nSpecies=rep(1,nSites),
+                        Dsoil=rep(413,nSites),
+                        FC=rep(0.450,nSites),
+                        WP=rep(0.118,nSites)
+  )
+}
 
 siteInfo$siteType[which(Initial$SIpine>=26)]<-2
 siteInfo$siteType[which(Initial$SIpine<26&Initial$SIpine>=20)]<-3
@@ -61,11 +72,24 @@ Initial$siteType[which(Initial$SIpine<14&Initial$SIpine>=8)]<-5
 Initial$siteType[which(Initial$SIpine>=26)]<-2
 Initial$siteType[which(Initial$SIpine<26&Initial$SIpine>=20)]<-3
 
+if (!cuWeather) {
+  load("rdata/climID.rdata")
+  colnames(climID) <- c("siteID", "climID")
+  siteInfo <- merge(climID, siteInfo, by="siteID")
+  
+  
+  colnames(climID) <- c("id", "climID")
+  Initial <- merge(Initial, climID, by="id")
+}
+
+
 summary(siteInfo)
 if(multiLayer){
   siteInfo$nLayers <- 3
   siteInfo$nSpecies <- 3
 }
+
+nSites<-nrow(Initial)
 # save(siteInfo,file = 'siteInfo.rdata')
 ####################SiteInfo end##########################
 

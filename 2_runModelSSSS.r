@@ -9,7 +9,7 @@ output <- multiPrebas(initPrebas)
 
 nSites <- output$nSites
 simLength <- simulationLength(output)
-rotLength <- rotationLength(output, simLength)
+rotLength <- rotationLength(output)
 
 # initialize model for 1.5x longer rotation lengths
 rotLength_tot <- rotLength*1.5
@@ -55,9 +55,9 @@ if(!CSCrun) {
   rm(initPrebas1.5);gc()
   
   output_1.5 <- list(multiOut=output_1.5$multiOut,GVout=output_1.5$GVout,
-                 nSites=output_1.5$nSites,fAPAR=output_1.5$fAPAR,
-                 siteInfo=output_1.5$siteInfo,weatherYasso=output_1.5$weatherYasso,
-                 litterSize=output_1.5$litterSize,multiInitVar=output_1.5$multiInitVar)
+                     nSites=output_1.5$nSites,fAPAR=output_1.5$fAPAR,
+                     siteInfo=output_1.5$siteInfo,weatherYasso=output_1.5$weatherYasso,
+                     litterSize=output_1.5$litterSize,multiInitVar=output_1.5$multiInitVar)
   gc()
 }
 
@@ -83,3 +83,4 @@ if(!CSCrun) {
 #save(output, file=outFile)
 #save(output_1.5, file=outFile1.5)
 #save(output_max, file=outFileMax)
+

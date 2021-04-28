@@ -190,7 +190,9 @@ simulationLength <- function(output) {
 
 
 # rotation length
-rotationLength <- function(output, simLength) {
+rotationLength <- function(output) {
+  
+  simLength <- simulationLength(output)
   # length = year of clearcut + age when the simulation starts
   rotlength <- simLength+output$multiInitVar[,2,1]
   return(rotlength)

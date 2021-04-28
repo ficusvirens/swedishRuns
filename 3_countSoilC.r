@@ -6,7 +6,7 @@
 
 
 simLength <- simulationLength(output)
-rotLength <- rotationLength(output, simLength)
+rotLength <- rotationLength(output)
 
 # count soil C  
 soilCbyLayer <- countSoilCstsp(output, species, 
@@ -15,24 +15,24 @@ soilCstst <- (rowSums(soilCbyLayer$treeLitter)
               +rowSums(soilCbyLayer$gvLitter))/10000
 
 simLength1.5 <- simulationLength(output_1.5)
-rotLength1.5 <- rotationLength(output_1.5, simLength1.5)
+rotLength1.5 <- rotationLength(output_1.5)
 
 
 # count soil C  
 soilCbyLayer1.5 <- countSoilCstsp(output_1.5, species, 
-                               gvrun=1, rotLength1.5, simLength1.5)
+                                  gvrun=1, rotLength1.5, simLength1.5)
 soilCstst1.5 <- (rowSums(soilCbyLayer1.5$treeLitter)
-              +rowSums(soilCbyLayer1.5$gvLitter))/10000
+                 +rowSums(soilCbyLayer1.5$gvLitter))/10000
 
 simLengthMax <- simulationLength(output_max)
-rotLengthMax <- rotationLength(output_max, simLengthMax)
+rotLengthMax <- rotationLength(output_max)
 
 
 # count soil C  
 soilCbyLayerMax <- countSoilCstsp(output_max, species, 
-                               gvrun=1, rotLengthMax, simLengthMax)
+                                  gvrun=1, rotLengthMax, simLengthMax)
 soilCststMax <- (rowSums(soilCbyLayerMax$treeLitter)
-              +rowSums(soilCbyLayerMax$gvLitter))/10000
+                 +rowSums(soilCbyLayerMax$gvLitter))/10000
 
 
 # count soil C for time/space runs
@@ -59,6 +59,6 @@ c_m0 <- sum(prebas_m$treeLitter)/10000
 #save(soilCstst, soilCstst1.5, soilCststMax,
 #     simLength, rotLength, simLength1.5, rotLength1.5,
 #     simLengthMax, rotLengthMax, file=outFileSoilC)
-
-# save(c_got, c_svea, c_sn, c_nn, c_m, 
-#     c_got0, c_svea0, c_sn0, c_nn0, c_m0, file=outFileSoilCTS)
+# 
+#  save(c_got, c_svea, c_sn, c_nn, c_m, 
+#      c_got0, c_svea0, c_sn0, c_nn0, c_m0, file=outFileSoilCTS)

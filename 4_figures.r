@@ -1,4 +1,5 @@
 library(ggplot2)
+library(viridis)
 
 
 # --------- load data ------------
@@ -9,13 +10,14 @@ load(outFile1.5)
 load(outFileMax)
 load(outFileTS)
 load(InitPrebasFile)
+
 load(litterdata)
 
 # ----- general data -----
 plot_run <- select_plotrun(plotrun)
 nSites <- plot_run$nSites
 simLength_prun <- simulationLength(plot_run)
-rotLength_prun <- rotationLength(plot_run, simLength_prun)
+rotLength_prun <- rotationLength(plot_run)
 
 
 reg_output <- regionPTS(plot_area)
@@ -42,6 +44,7 @@ regNo <- regionOrder(plot_area)
 myCols2 <- c("grey", "maroon4")
 myCols3 <- c("orangered3", "royalblue4", "seagreen4")
 myCols5 = c("grey", "maroon4", "seagreen4", "darkorange3", "deepskyblue4")
+myCols2.2 <- c("seagreen3", "steelblue3")
 
 # -------- labels --------------
 regs_label_0 = c("Götaland", "Svealand", "Södra Norrland", 
@@ -56,6 +59,9 @@ tupek_prebas_rot_label = c("Tupek","Prebas time/space",
                            "Prebas whole rotation",
                            "Prebas rotation x1.5", 
                            "Prebas max rotation")
+tupek_prebas_label = c("Tupek","Prebas time/space", 
+                       "Prebas whole rotation")
+prebas_twolabel = c("Prebas site specific", "Prebas time/space")
 litter_label = c("Tree foliage", "Fine root", "Fine woody", 
                  "Coarse woody", "Ground vegetation")
 litter_label_5empty = c("","", "tree foliage", "","","", "", "fine root", "", "",
@@ -285,29 +291,29 @@ boxplot(fol_d, fol_pts, rowSums(litter$fol[reg[[regNo]][[1]],]),
 legend("topright", fill = myCols5, 
        legend = tupek_prebas_rot_label, horiz = F)
 
-# ----- try to make the above better with ggplot2 ---
+#----------- trying to do it again better with ggplot2
 
 # put all litter data in a list of lists
 megaLitter <- list("fol" = list("d" = fol_d, "ts" = fol_pts, 
-                            "normal" = rowSums(litter$fol[reg[[regNo]][[1]],]), 
-                            "1.5" = rowSums(litter1.5$fol[reg[[regNo]][[1]],]), 
-                            "max" = rowSums(litterMax$fol[reg[[regNo]][[1]],])),
-                    "fr" = list("d" = fr_d, "ts" = fr_pts, 
-                            "normal" = rowSums(litter$fr[reg[[regNo]][[1]],]),
-                            "1.5" = rowSums(litter1.5$fr[reg[[regNo]][[1]],]), 
-                            "max" = rowSums(litterMax$fr[reg[[regNo]][[1]],])),
-                    "fw" = list("d" = fw_d, "ts" = fw_pts, 
-                            "normal" = rowSums(litter$fw[reg[[regNo]][[1]],]),
-                            "1.5" = rowSums(litter1.5$fw[reg[[regNo]][[1]],]), 
-                            "max" = rowSums(litterMax$fw[reg[[regNo]][[1]],])),
-                    "cw" = list("d" = cw_d, "ts" = cw_pts, 
-                            "normal" = rowSums(litter$cw[reg[[regNo]][[1]],]),
-                            "1.5" = rowSums(litter1.5$cw[reg[[regNo]][[1]],]), 
-                            "max" = rowSums(litterMax$cw[reg[[regNo]][[1]],])),
-                    "gv" = list("d" = gv_d, "ts"= gv_pts, 
-                            "normal" = litter$gv[reg[[regNo]][[1]]], 
-                            "1.5" = litter1.5$gv[reg[[regNo]][[1]]], 
-                            "max" = litterMax$gv[reg[[regNo]][[1]]]))
+                                "normal" = rowSums(litter$fol[reg[[regNo]][[1]],]), 
+                                "1.5" = rowSums(litter1.5$fol[reg[[regNo]][[1]],]), 
+                                "max" = rowSums(litterMax$fol[reg[[regNo]][[1]],])),
+                   "fr" = list("d" = fr_d, "ts" = fr_pts, 
+                               "normal" = rowSums(litter$fr[reg[[regNo]][[1]],]),
+                               "1.5" = rowSums(litter1.5$fr[reg[[regNo]][[1]],]), 
+                               "max" = rowSums(litterMax$fr[reg[[regNo]][[1]],])),
+                   "fw" = list("d" = fw_d, "ts" = fw_pts, 
+                               "normal" = rowSums(litter$fw[reg[[regNo]][[1]],]),
+                               "1.5" = rowSums(litter1.5$fw[reg[[regNo]][[1]],]), 
+                               "max" = rowSums(litterMax$fw[reg[[regNo]][[1]],])),
+                   "cw" = list("d" = cw_d, "ts" = cw_pts, 
+                               "normal" = rowSums(litter$cw[reg[[regNo]][[1]],]),
+                               "1.5" = rowSums(litter1.5$cw[reg[[regNo]][[1]],]), 
+                               "max" = rowSums(litterMax$cw[reg[[regNo]][[1]],])),
+                   "gv" = list("d" = gv_d, "ts"= gv_pts, 
+                               "normal" = litter$gv[reg[[regNo]][[1]]], 
+                               "1.5" = litter1.5$gv[reg[[regNo]][[1]]], 
+                               "max" = litterMax$gv[reg[[regNo]][[1]]]))
 
 # melt it to make a boxplot
 megaLitterMelt <- melt(megaLitter)
@@ -321,7 +327,7 @@ megaLitterMelt$variable <- factor(megaLitterMelt$variable, levels = c("fol", "fr
 ggplot(megaLitterMelt, aes(x=variable, y=value, fill=source)) + 
   ylim(0, 2000) +  
   geom_boxplot() + 
-  labs(title = c("Litter ",paste0(regionName(plot_area))), fill = "",
+  labs(title = paste0("Litter ",regionName(plot_area)), fill = "",
        x="", y = "kg C / ha") +
   theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
         axis.text = element_text(size=14), # axis text size
@@ -330,7 +336,47 @@ ggplot(megaLitterMelt, aes(x=variable, y=value, fill=source)) +
   scale_fill_discrete(labels=tupek_prebas_rot_label) + # legend labels
   scale_x_discrete(labels=litter_label) # x axis labels
 
-  
+
+
+# ----- megaLitter plot without 1.5 & max
+
+# put all litter data in a list of lists
+megaLitter2 <- list("fol" = list("d" = fol_d, "ts" = fol_pts, 
+                                 "normal" = rowSums(litter$fol[reg[[regNo]][[1]],])), 
+                    "fr" = list("d" = fr_d, "ts" = fr_pts, 
+                                "normal" = rowSums(litter$fr[reg[[regNo]][[1]],])),
+                    "fw" = list("d" = fw_d, "ts" = fw_pts, 
+                                "normal" = rowSums(litter$fw[reg[[regNo]][[1]],])),
+                    "cw" = list("d" = cw_d, "ts" = cw_pts, 
+                                "normal" = rowSums(litter$cw[reg[[regNo]][[1]],])),
+                    "gv" = list("d" = gv_d, "ts"= gv_pts, 
+                                "normal" = litter$gv[reg[[regNo]][[1]]]))
+
+# melt it to make a boxplot
+megaLitterMelt2 <- melt(megaLitter2)
+colnames(megaLitterMelt2) <- c("value", "source", "variable")
+
+# factorize to make the order in the plot right
+megaLitterMelt2$source <- factor(megaLitterMelt2$source, levels = c("d", "ts", "normal"))
+megaLitterMelt2$variable <- factor(megaLitterMelt2$variable, levels = c("fol", "fr", "fw", "cw", "gv"))
+
+
+
+ggplot(megaLitterMelt2, aes(x=variable, y=value, fill=source)) + 
+  ylim(0, 2000) +  
+  geom_boxplot() + 
+  labs(title = paste0("Litter ",regionName(plot_area)), fill = "",
+       x="", y = "kg C / ha") +
+  theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
+        axis.text = element_text(size=14), # axis text size
+        axis.title = element_text(size=16), # axis title size
+        legend.text = element_text(size=12)) + # legend text size
+  scale_fill_discrete(labels=tupek_prebas_label) + # legend labels
+  scale_x_discrete(labels=litter_label) # x axis labels
+
+
+
+
 
 # --------- litter / soil C
 
@@ -520,7 +566,7 @@ megaETS_melt$region <- factor(megaETS_melt$region,
 
 ggplot(megaETS_melt, aes(x=region, y=value, fill=source)) + 
   geom_boxplot() +
-    labs(title = "ETS", fill = "", # titles
+  labs(title = "ETS", fill = "", # titles
        x="", y = "Degree days") +
   theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
         axis.text = element_text(size=14), # axis text size
@@ -529,3 +575,75 @@ ggplot(megaETS_melt, aes(x=region, y=value, fill=source)) +
   scale_fill_discrete(labels=c("Prebas", "Measurements")) + # legend labels
   scale_x_discrete(labels=regs_label_0) # x axis labels
 
+# ------- GROSS GROWTH ---------------
+
+
+maiData <- read.csv("input/mai2.csv", row.names = 1)
+
+simLength <- simulationLength(plot_run)
+rotLength <- rotationLength(plot_run)
+
+
+avGG_ssss <- vector()
+###avGG = average gross growth
+for(i in 1:nSites){
+  avGG_ssss[i] <- sum(plot_run$multiOut[i,1:simLength[i],43,,1])/rotLength[i]
+}
+
+avGG_ts <- rowSums(reg_output$multiOut[,1:5,43,,1])/5
+
+boxplot(avGG_ssss[reg[[regNo]]$plot_run], avGG_ts, 
+        main = paste0("Gross growth ",regionName(plot_area)), 
+        names = c("Prebas site specific", "Prebas time/space"), 
+        ylab = "m3/ha") 
+abline(h=maiData[4,regionOrder(plot_area)], col="red")
+legend("topright", fill = c("red"), 
+       legend = c("Measured"))
+
+
+# ---- try to put all the regions in the same figure -----
+
+
+GG_got <- rowSums(output_got$multiOut[,1:5,43,,1])/5
+GG_svea <- rowSums(output_svea$multiOut[,1:5,43,,1])/5
+GG_sn <- rowSums(output_sn$multiOut[,1:5,43,,1])/5
+GG_nn <- rowSums(output_nn$multiOut[,1:5,43,,1])/5
+GG_sweden <- rowSums(output_m$multiOut[,1:5,43,,1])/5
+
+megaGG <- list("got" = list("ssss" = avGG_ssss[reg$got$plot_run], "ts" = GG_got), 
+               "svea" = list("ssss" = avGG_ssss[reg$svea$plot_run], "ts" = GG_svea), 
+               "sn" = list("ssss" = avGG_ssss[reg$sn$plot_run], "ts" = GG_sn), 
+               "nn" = list("ssss" = avGG_ssss[reg$nn$plot_run], "ts" = GG_nn), 
+               "sweden" = list("ssss" = avGG_ssss[reg$sweden$plot_run], "ts" = GG_sweden))
+
+
+megaGGmelt <- melt(megaGG)
+colnames(megaGGmelt) <- c("value", "source", "region")
+
+megaGGmelt$region<- factor(megaGGmelt$region, levels = c("got", "svea", "sn", "nn", "sweden"))
+
+
+
+ggplot(megaGGmelt, aes(x=region, y=value, fill=source)) + 
+  geom_boxplot() +
+  labs(title = "Gross growth in Sweden", fill = "",
+       x="", y = "m3/ha") +
+  theme(plot.title = element_text(hjust = 0.5, size =22), # title in the center
+        axis.text = element_text(size=14), # axis text size
+        axis.title = element_text(size=16), # axis title size
+        legend.text = element_text(size=12)) + # legend text size
+  scale_fill_manual(labels=prebas_twolabel, values = myCols2.2) + # legend labels & box colors
+  
+  scale_x_discrete(labels=regs_label)+ # x axis labels
+  # measurement lines
+  geom_segment(aes(x = 0.6, y = maiData[4,1], xend = 1.4, 
+                   yend = maiData[4,1], linetype="Measurements"), color = "hotpink3")+
+  geom_segment(aes(x = 1.6, y = maiData[4,2], xend = 2.4, 
+                   yend = maiData[4,2], linetype="Measurements"), color = "hotpink3")+
+  geom_segment(aes(x = 2.6, y = maiData[4,3], xend = 3.4, 
+                   yend = maiData[4,3], linetype="Measurements"), color = "hotpink3")+
+  geom_segment(aes(x = 3.6, y = maiData[4,4], xend = 4.4, 
+                   yend = maiData[4,4], linetype="Measurements"), color = "hotpink3")+
+  geom_segment(aes(x = 4.6, y = maiData[4,5], xend = 5.4, 
+                   yend = maiData[4,5], linetype="Measurements"), color = "hotpink3")+
+  theme(legend.title=element_blank()) # legend title off

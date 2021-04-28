@@ -12,11 +12,12 @@ library(ggpubr)
 library(abind)
 library(plyr)
 
+cuWeather = FALSE # set to TRUE if weather data & climID's are from cu file
 multiLayer = TRUE
-fromPlant = F
+fromPlant = T
 CSCrun = F
 testRun = F  ###set to True if you want to make a test run
-simRuns = 15 ####years of simulations site specific
+simRuns = 5 ####years of simulations site specific
 simRunsTS = 5 ### years of simulations for time/space run
 def_thin = 1 # default thin, 1 or 0 
 cl_cut = 1 # clearcut, 1 or 0
@@ -35,7 +36,7 @@ devtools::install_github("ForModLabUHel/Rprebasso", ref=vPREBAS)
 library(Rprebasso)
 
 
-weatherFile <- "rdata/weather150.rdata" ###weather input file
+weatherFile <- "rdata/weather_clipick.rdata" ###weather input file
 
 # file with site data
 cuFile <- "rdata/se.carbon.soil.meteo.preles.biomass.gv.PRIME.RData"
